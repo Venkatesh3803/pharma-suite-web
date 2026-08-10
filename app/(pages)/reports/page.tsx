@@ -3,16 +3,10 @@
 import React, { useState } from "react";
 import {
   Search,
-  Calendar,
   Download,
-  TrendingUp,
-  CreditCard,
-  ShoppingBag,
   ArrowUpRight,
   Filter,
   RefreshCw,
-  FileSpreadsheet,
-  TrendingDown,
   BarChart3,
 } from "lucide-react";
 
@@ -92,6 +86,9 @@ const channelSales = [
   },
 ];
 
+const inputBase =
+  "w-full rounded-none border border-line bg-white px-3 py-2 text-[13.5px] text-ink placeholder:text-ink/35 focus:outline-none focus:border-teal-mid focus:ring-2 focus:ring-teal-mid/15 transition-all font-body";
+
 export default function SalesReport() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
@@ -107,329 +104,119 @@ export default function SalesReport() {
     return matchesSearch && matchesStatus;
   });
 
-  // Calculate gross running totals for the listed entries
-  const totalGrossRevenue = initialSales.reduce(
-    (acc, current) => acc + current.totalAmount,
-    0,
-  );
-  const totalInvoicedTax = initialSales.reduce(
-    (acc, current) => acc + current.tax,
-    0,
-  );
-
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "24px",
-        width: "100%",
-      }}
-    >
+    <div className="flex w-full flex-col gap-6">
       {/* ── Header System ── */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
+      <div className="flex items-center justify-between">
         <div>
-          <h1
-            style={{
-              fontSize: "24px",
-              fontWeight: 700,
-              color: "#0f172a",
-              margin: 0,
-            }}
-          >
+          <span className="text-[10.5px] font-medium uppercase tracking-[0.18em] text-stamp font-mono">
+            Revenue Intelligence Ledger
+          </span>
+          <h1 className="mt-1.5 font-display text-2xl font-semibold tracking-tight text-ink">
             Sales & Revenue Analytics
           </h1>
-          <p
-            style={{
-              fontSize: "14px",
-              color: "#64748b",
-              marginTop: "4px",
-              marginBottom: 0,
-            }}
-          >
+          <p className="mt-1 text-[13.5px] text-ink/55">
             Analyze macro billing parameters, track multi-channel volume shares,
             and audit outstanding invoice matrices.
           </p>
         </div>
 
-        <div style={{ display: "flex", gap: "8px" }}>
-          <button
-            style={{
-              padding: "8px 14px",
-              borderRadius: "8px",
-              border: "1px solid #cbd5e1",
-              backgroundColor: "#fff",
-              fontSize: "13.5px",
-              fontWeight: 500,
-              color: "#475569",
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              cursor: "pointer",
-            }}
-          >
+        <div className="flex gap-2">
+          <button className="flex cursor-pointer items-center gap-1.5 rounded-none border border-line bg-white px-3.5 py-2 text-[13.5px] font-medium text-ink/70 transition-colors hover:bg-paper-dim">
             <RefreshCw size={14} /> Refresh Fields
           </button>
-          <button
-            style={{
-              padding: "8px 14px",
-              borderRadius: "8px",
-              backgroundColor: "#0f172a",
-              color: "#fff",
-              fontSize: "13.5px",
-              fontWeight: 600,
-              border: "none",
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              cursor: "pointer",
-            }}
-          >
+          <button className="flex cursor-pointer items-center gap-1.5 rounded-none border border-ink bg-ink px-3.5 py-2 text-[13.5px] font-semibold text-paper transition-colors hover:bg-teal-deep">
             <Download size={14} /> Export Report Summary
           </button>
         </div>
       </div>
 
       {/* ── Financial Ledger Cards Row ── */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-          gap: "16px",
-        }}
-      >
-        <div
-          style={{
-            backgroundColor: "#ffffff",
-            border: "1px solid #e2e8f0",
-            borderRadius: "10px",
-            padding: "16px",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-            }}
-          >
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="border border-line bg-white p-4">
+          <div className="flex items-start justify-between">
             <div>
-              <div
-                style={{ fontSize: "12px", color: "#64748b", fontWeight: 500 }}
-              >
+              <div className="text-[11px] font-semibold uppercase tracking-[0.06em] text-ink/50 font-mono">
                 Gross Product Turnaround
               </div>
-              <div
-                style={{
-                  fontSize: "22px",
-                  fontWeight: 700,
-                  color: "#0f172a",
-                  marginTop: "4px",
-                }}
-              >
+              <div className="mt-1 font-display text-[22px] font-bold text-ink">
                 ₹2,06,150.00
               </div>
             </div>
-            <span
-              style={{
-                fontSize: "11px",
-                backgroundColor: "#dcfce7",
-                color: "#15803d",
-                padding: "2px 6px",
-                borderRadius: "4px",
-                fontWeight: 600,
-                display: "flex",
-                alignItems: "center",
-                gap: "2px",
-              }}
-            >
+            <span className="flex items-center gap-0.5 rounded-none bg-teal-mid/10 px-1.5 py-0.5 text-[11px] font-semibold text-teal-mid">
               <ArrowUpRight size={12} /> +12.4%
             </span>
           </div>
-          <div
-            style={{ fontSize: "11px", color: "#94a3b8", marginTop: "12px" }}
-          >
+          <div className="mt-3 text-[11px] text-ink/40">
             Calculated across current batch cycle
           </div>
         </div>
 
-        <div
-          style={{
-            backgroundColor: "#ffffff",
-            border: "1px solid #e2e8f0",
-            borderRadius: "10px",
-            padding: "16px",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-            }}
-          >
+        <div className="border border-line bg-white p-4">
+          <div className="flex items-start justify-between">
             <div>
-              <div
-                style={{ fontSize: "12px", color: "#64748b", fontWeight: 500 }}
-              >
+              <div className="text-[11px] font-semibold uppercase tracking-[0.06em] text-ink/50 font-mono">
                 Tax Contributions (GST)
               </div>
-              <div
-                style={{
-                  fontSize: "22px",
-                  fontWeight: 700,
-                  color: "#0f172a",
-                  marginTop: "4px",
-                }}
-              >
+              <div className="mt-1 font-display text-[22px] font-bold text-ink">
                 ₹24,738.00
               </div>
             </div>
-            <span
-              style={{
-                fontSize: "11px",
-                backgroundColor: "#f1f5f9",
-                color: "#475569",
-                padding: "2px 6px",
-                borderRadius: "4px",
-                fontWeight: 600,
-              }}
-            >
+            <span className="rounded-none bg-paper-dim px-1.5 py-0.5 text-[11px] font-semibold text-ink/60">
               12% Avg Base
             </span>
           </div>
-          <div
-            style={{ fontSize: "11px", color: "#94a3b8", marginTop: "12px" }}
-          >
+          <div className="mt-3 text-[11px] text-ink/40">
             Automated liability computation ledger
           </div>
         </div>
 
-        <div
-          style={{
-            backgroundColor: "#ffffff",
-            border: "1px solid #e2e8f0",
-            borderRadius: "10px",
-            padding: "16px",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "flex-start",
-            }}
-          >
+        <div className="border border-line bg-white p-4">
+          <div className="flex items-start justify-between">
             <div>
-              <div
-                style={{ fontSize: "12px", color: "#64748b", fontWeight: 500 }}
-              >
+              <div className="text-[11px] font-semibold uppercase tracking-[0.06em] text-ink/50 font-mono">
                 Active Volume Despatches
               </div>
-              <div
-                style={{
-                  fontSize: "22px",
-                  fontWeight: 700,
-                  color: "#0f172a",
-                  marginTop: "4px",
-                }}
-              >
+              <div className="mt-1 font-display text-[22px] font-bold text-ink">
                 {initialSales.length} Invoices
               </div>
             </div>
-            <span
-              style={{
-                fontSize: "11px",
-                backgroundColor: "#e0f2fe",
-                color: "#0369a1",
-                padding: "2px 6px",
-                borderRadius: "4px",
-                fontWeight: 600,
-              }}
-            >
+            <span className="rounded-none bg-stamp-dim px-1.5 py-0.5 text-[11px] font-semibold text-stamp">
               100% Core
             </span>
           </div>
-          <div
-            style={{ fontSize: "11px", color: "#94a3b8", marginTop: "12px" }}
-          >
+          <div className="mt-3 text-[11px] text-ink/40">
             Zero pipeline blocks flagged today
           </div>
         </div>
       </div>
 
       {/* ── Double Layout: Channel Share vs Detailed Invoices Ledger ── */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 320px",
-          gap: "20px",
-          alignItems: "start",
-        }}
-      >
+      <div className="grid items-start gap-5 xl:grid-cols-[1fr_320px]">
         {/* LEFT COLUMN: MAIN INVOICES LEDGER CONTROL */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+        <div className="flex flex-col gap-4">
           {/* Action Filter Sub-Bar */}
-          <div
-            style={{
-              display: "flex",
-              gap: "12px",
-              backgroundColor: "#ffffff",
-              border: "1px solid #e2e8f0",
-              borderRadius: "10px",
-              padding: "12px",
-              alignItems: "center",
-            }}
-          >
-            <div style={{ position: "relative", flex: 1 }}>
+          <div className="flex items-center gap-3 border border-line bg-white p-3">
+            <div className="relative flex-1">
               <Search
                 size={15}
-                style={{
-                  position: "absolute",
-                  left: "10px",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  color: "#94a3b8",
-                }}
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 text-ink/40"
               />
               <input
                 type="text"
                 placeholder="Search by unique invoice serial ID or corporate customer name..."
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "6px 10px 6px 32px",
-                  borderRadius: "6px",
-                  border: "1px solid #cbd5e1",
-                  fontSize: "13px",
-                  outline: "none",
-                  fontFamily: "inherit",
-                }}
+                className={`${inputBase} pl-8`}
               />
             </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-              <Filter size={14} color="#64748b" />
+            <div className="flex items-center gap-1.5">
+              <Filter size={14} className="text-ink/50" />
               <select
                 value={statusFilter}
                 onChange={e => setStatusFilter(e.target.value)}
-                style={{
-                  padding: "6px 10px",
-                  borderRadius: "6px",
-                  border: "1px solid #cbd5e1",
-                  backgroundColor: "#fff",
-                  fontSize: "13px",
-                  color: "#475569",
-                  outline: "none",
-                  cursor: "pointer",
-                }}
+                className={`${inputBase} cursor-pointer`}
               >
                 <option value="All">All Invoicing States</option>
                 <option value="Settled">Settled Ledger</option>
@@ -441,94 +228,30 @@ export default function SalesReport() {
           </div>
 
           {/* Tables Workspace Card */}
-          <div
-            style={{
-              backgroundColor: "#ffffff",
-              border: "1px solid #e2e8f0",
-              borderRadius: "12px",
-              overflow: "hidden",
-            }}
-          >
-            <div style={{ overflowX: "auto" }}>
-              <table
-                style={{
-                  width: "100%",
-                  borderCollapse: "collapse",
-                  textAlign: "left",
-                  fontSize: "13.5px",
-                }}
-              >
+          <div className="overflow-hidden border border-line bg-white">
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-left text-[13.5px]">
                 <thead>
-                  <tr
-                    style={{
-                      backgroundColor: "#f8fafc",
-                      borderBottom: "1px solid #e2e8f0",
-                    }}
-                  >
-                    <th
-                      style={{
-                        padding: "14px 16px",
-                        color: "#475569",
-                        fontWeight: 600,
-                      }}
-                    >
+                  <tr className="border-b border-line bg-paper-dim">
+                    <th className="px-4 py-3.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/55">
                       Billing Identification
                     </th>
-                    <th
-                      style={{
-                        padding: "14px 16px",
-                        color: "#475569",
-                        fontWeight: 600,
-                      }}
-                    >
+                    <th className="px-4 py-3.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/55">
                       Consignee Entity
                     </th>
-                    <th
-                      style={{
-                        padding: "14px 16px",
-                        color: "#475569",
-                        fontWeight: 600,
-                      }}
-                    >
+                    <th className="px-4 py-3.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/55">
                       Invoice Date
                     </th>
-                    <th
-                      style={{
-                        padding: "14px 16px",
-                        color: "#475569",
-                        fontWeight: 600,
-                      }}
-                    >
+                    <th className="px-4 py-3.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/55">
                       Settlement Mode
                     </th>
-                    <th
-                      style={{
-                        padding: "14px 16px",
-                        color: "#475569",
-                        fontWeight: 600,
-                        textAlign: "right",
-                      }}
-                    >
+                    <th className="px-4 py-3.5 text-right font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/55">
                       Tax Matrix
                     </th>
-                    <th
-                      style={{
-                        padding: "14px 16px",
-                        color: "#475569",
-                        fontWeight: 600,
-                        textAlign: "right",
-                      }}
-                    >
+                    <th className="px-4 py-3.5 text-right font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/55">
                       Gross Value
                     </th>
-                    <th
-                      style={{
-                        padding: "14px 16px",
-                        color: "#475569",
-                        fontWeight: 600,
-                        textAlign: "center",
-                      }}
-                    >
+                    <th className="px-4 py-3.5 text-center font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/55">
                       State
                     </th>
                   </tr>
@@ -537,78 +260,36 @@ export default function SalesReport() {
                   {filteredSales.map(sale => (
                     <tr
                       key={sale.invoiceNo}
-                      style={{ borderBottom: "1px solid #f1f5f9" }}
-                      onMouseEnter={e =>
-                        (e.currentTarget.style.backgroundColor = "#f8fafc")
-                      }
-                      onMouseLeave={e =>
-                        (e.currentTarget.style.backgroundColor = "transparent")
-                      }
+                      className="border-b border-line/60 transition-colors hover:bg-paper/70"
                     >
-                      <td
-                        style={{
-                          padding: "14px 16px",
-                          fontWeight: 600,
-                          color: "#0f172a",
-                          fontFamily: "monospace",
-                        }}
-                      >
+                      <td className="px-4 py-3.5 font-mono font-semibold text-ink">
                         {sale.invoiceNo}
                       </td>
-                      <td style={{ padding: "14px 16px" }}>
-                        <div style={{ fontWeight: 500, color: "#334155" }}>
+                      <td className="px-4 py-3.5">
+                        <div className="font-medium text-ink/70">
                           {sale.customer}
                         </div>
-                        <div style={{ fontSize: "11px", color: "#94a3b8" }}>
+                        <div className="text-[11px] text-ink/40">
                           Contains {sale.itemsCount} SKUs
                         </div>
                       </td>
-                      <td style={{ padding: "14px 16px", color: "#64748b" }}>
-                        {sale.date}
-                      </td>
-                      <td
-                        style={{
-                          padding: "14px 16px",
-                          color: "#475569",
-                          fontSize: "12.5px",
-                        }}
-                      >
+                      <td className="px-4 py-3.5 text-ink/50">{sale.date}</td>
+                      <td className="px-4 py-3.5 text-[12.5px] text-ink/60">
                         {sale.paymentMode}
                       </td>
-                      <td
-                        style={{
-                          padding: "14px 16px",
-                          textAlign: "right",
-                          color: "#64748b",
-                          fontFamily: "monospace",
-                        }}
-                      >
+                      <td className="px-4 py-3.5 text-right font-mono text-ink/50">
                         ₹{sale.tax.toFixed(2)}
                       </td>
-                      <td
-                        style={{
-                          padding: "14px 16px",
-                          textAlign: "right",
-                          fontWeight: 700,
-                          color: "#0f172a",
-                          fontFamily: "monospace",
-                        }}
-                      >
+                      <td className="px-4 py-3.5 text-right font-mono font-bold text-ink">
                         ₹{sale.totalAmount.toFixed(2)}
                       </td>
-                      <td style={{ padding: "14px 16px", textAlign: "center" }}>
+                      <td className="px-4 py-3.5 text-center">
                         <span
-                          style={{
-                            display: "inline-block",
-                            padding: "3px 8px",
-                            borderRadius: "4px",
-                            fontSize: "11px",
-                            fontWeight: 600,
-                            backgroundColor:
-                              sale.status === "Settled" ? "#e0fdf4" : "#fff7ed",
-                            color:
-                              sale.status === "Settled" ? "#16a34a" : "#c2410c",
-                          }}
+                          className={`inline-block px-2 py-0.5 text-[11px] font-semibold ${
+                            sale.status === "Settled"
+                              ? "border border-teal-mid/25 bg-teal-mid/10 text-teal-mid"
+                              : "border border-stamp/30 bg-stamp-dim text-stamp"
+                          }`}
                         >
                           {sale.status}
                         </span>
@@ -622,115 +303,47 @@ export default function SalesReport() {
         </div>
 
         {/* RIGHT COLUMN: DISTRIBUTION OUTLETS SHIFT MATRIX */}
-        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-          <div
-            style={{
-              backgroundColor: "#ffffff",
-              border: "1px solid #e2e8f0",
-              borderRadius: "12px",
-              padding: "16px",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                borderBottom: "1px solid #f1f5f9",
-                paddingBottom: "12px",
-                marginBottom: "14px",
-              }}
-            >
-              <BarChart3 size={16} color="#475569" />
-              <h3
-                style={{
-                  fontSize: "14px",
-                  fontWeight: 700,
-                  color: "#0f172a",
-                  margin: 0,
-                }}
-              >
+        <div className="flex flex-col gap-4">
+          <div className="border border-line bg-white p-4">
+            <div className="mb-3.5 flex items-center gap-2 border-b border-line pb-3">
+              <BarChart3 size={16} className="text-stamp" />
+              <h3 className="font-display text-[14px] font-bold text-ink">
                 Channel Split Matrix
               </h3>
             </div>
 
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "12px" }}
-            >
+            <div className="flex flex-col gap-3">
               {channelSales.map((chan, idx) => (
                 <div
                   key={idx}
-                  style={{
-                    padding: "12px",
-                    borderRadius: "8px",
-                    backgroundColor: "#f8fafc",
-                    border: "1px solid #f1f5f9",
-                  }}
+                  className="rounded-none border border-line bg-paper p-3"
                 >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: "13px",
-                        fontWeight: 600,
-                        color: "#334155",
-                      }}
-                    >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[13px] font-semibold text-ink/70">
                       {chan.channel}
                     </span>
-                    <span
-                      style={{
-                        fontSize: "12px",
-                        fontWeight: 700,
-                        color: "#059669",
-                      }}
-                    >
+                    <span className="font-mono text-[12px] font-bold text-stamp">
                       {chan.share}
                     </span>
                   </div>
 
                   {/* Visual Proportion Bar Layout */}
-                  <div
-                    style={{
-                      width: "100%",
-                      height: "6px",
-                      backgroundColor: "#e2e8f0",
-                      borderRadius: "3px",
-                      marginTop: "8px",
-                      overflow: "hidden",
-                    }}
-                  >
+                  <div className="mt-2 h-1.5 w-full overflow-hidden rounded-none bg-line">
                     <div
-                      style={{
-                        width: chan.share,
-                        height: "100%",
-                        backgroundColor:
-                          idx === 0
-                            ? "#0f172a"
-                            : idx === 1
-                              ? "#0284c7"
-                              : "#10b981",
-                        borderRadius: "3px",
-                      }}
+                      className={`h-full ${
+                        idx === 0
+                          ? "bg-ink"
+                          : idx === 1
+                            ? "bg-teal-mid"
+                            : "bg-stamp"
+                      }`}
+                      style={{ width: chan.share }}
                     />
                   </div>
 
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      fontSize: "11px",
-                      color: "#64748b",
-                      marginTop: "8px",
-                    }}
-                  >
+                  <div className="mt-2 flex justify-between text-[11px] text-ink/50">
                     <span>{chan.transactions} Transactions</span>
-                    <span style={{ fontWeight: 600, color: "#0f172a" }}>
+                    <span className="font-mono font-semibold text-ink">
                       {chan.grossVolume}
                     </span>
                   </div>
@@ -738,21 +351,8 @@ export default function SalesReport() {
               ))}
             </div>
 
-            <div
-              style={{
-                marginTop: "16px",
-                backgroundColor: "#f0fdf4",
-                border: "1px dashed #bbf7d0",
-                borderRadius: "8px",
-                padding: "10px",
-                fontSize: "12px",
-                color: "#16a34a",
-                textAlign: "center",
-                fontWeight: 500,
-              }}
-            >
-              💡 B2B distribution volumes increased by 4% over the last 48
-              hours.
+            <div className="mt-4 rounded-none border border-dashed border-teal-mid/40 bg-teal-mid/10 p-2.5 text-center text-[12px] font-medium text-teal-mid">
+              B2B distribution volumes increased by 4% over the last 48 hours.
             </div>
           </div>
         </div>

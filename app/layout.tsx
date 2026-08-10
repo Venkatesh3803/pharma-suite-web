@@ -13,7 +13,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="antialiased bg-slate-50 text-slate-900">
+      <body className="antialiased bg-paper text-ink">
         <TooltipProvider delayDuration={0}>{children}</TooltipProvider>
       </body>
     </html>

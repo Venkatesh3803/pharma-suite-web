@@ -14,6 +14,8 @@ import {
   Briefcase,
   ChevronDown,
   AlertTriangle,
+  ShoppingBag,
+  Pill,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -54,10 +56,11 @@ const isStrongPassword = (password: string) =>
 
 export default function SignUpPage() {
   const [formData, setFormData] = useState({
-    pharmacyName: "",
+    businessCategory: "pharma" as "pharma" | "grocery",
+    workspaceName: "",
     workspaceCode: "",
     type: "SinglePharmacy",
-    drugLicenseNumber: "",
+    complianceLicenseNumber: "",
     gstinOrTaxId: "",
     state: "Telangana",
     phone: "",
@@ -75,6 +78,15 @@ export default function SignUpPage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleCategoryChange = (category: "pharma" | "grocery") => {
+    setFormData({
+      ...formData,
+      businessCategory: category,
+      type: category === "pharma" ? "SinglePharmacy" : "Supermarket",
+      complianceLicenseNumber: "",
+    });
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -122,11 +134,12 @@ export default function SignUpPage() {
     const payload = {
       workspace: {
         workspaceCode: formData.workspaceCode.toUpperCase().trim(),
-        name: formData.pharmacyName.trim(),
-        displayName: formData.pharmacyName.trim(),
+        name: formData.workspaceName.trim(),
+        displayName: formData.workspaceName.trim(),
+        businessCategory: formData.businessCategory,
         type: formData.type,
         phone: `+91${formData.phone}`,
-        drugLicenseNumber: formData.drugLicenseNumber.trim(),
+        licenseNumber: formData.complianceLicenseNumber.trim(),
         gstinOrTaxId: formData.gstinOrTaxId
           ? formData.gstinOrTaxId.toUpperCase().trim()
           : undefined,
@@ -149,8 +162,6 @@ export default function SignUpPage() {
       const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // Needed so the browser stores the httpOnly refresh-token cookie
-        // the backend sets in its response.
         credentials: "include",
         body: JSON.stringify(payload),
       });
@@ -163,11 +174,7 @@ export default function SignUpPage() {
         );
       }
 
-      // The access token is short-lived and safe to keep in memory/localStorage;
-      // the long-lived refresh token already lives in the httpOnly cookie the
-      // browser just stored, so it's never touched by client-side JS.
       localStorage.setItem("access_token", data.data.accessToken);
-
       router.push("/onboarding");
     } catch (err: any) {
       setError(
@@ -179,14 +186,22 @@ export default function SignUpPage() {
     }
   };
 
-  const workspaceTypes = [
+  const pharmaWorkspaceTypes = [
     { value: "SinglePharmacy", label: "Single Retail Pharmacy" },
     { value: "Warehouse", label: "Central Inventory Warehouse" },
     { value: "ChainBranch", label: "Retail Chain Branch" },
     { value: "ManufacturingUnit", label: "Manufacturing Unit" },
     { value: "Distributor", label: "Wholesale Distributor" },
     { value: "Hospital", label: "In-Patient Hospital Pharmacy" },
-    { value: "ResearchLab", label: "Clinical Research Lab" },
+  ];
+
+  const groceryWorkspaceTypes = [
+    { value: "Supermarket", label: "Independent Supermarket" },
+    { value: "GroceryStore", label: "Kirana / Retail Grocery Store" },
+    { value: "Hypermarket", label: "Hypermarket / Megastore" },
+    { value: "FMCGDistributor", label: "FMCG Wholesale Distributor" },
+    { value: "DarkStore", label: "Quick-Commerce Dark Store" },
+    { value: "CentralWarehouse", label: "Grocery Central Warehouse" },
   ];
 
   const indianStates = [
@@ -221,6 +236,11 @@ export default function SignUpPage() {
     "Delhi",
     "Jammu & Kashmir",
   ];
+
+  const activeTypes =
+    formData.businessCategory === "pharma"
+      ? pharmaWorkspaceTypes
+      : groceryWorkspaceTypes;
 
   const eyebrow =
     "text-[10.5px] font-medium uppercase tracking-[0.18em] text-[var(--stamp)] [font-family:var(--font-mono)]";
@@ -259,26 +279,27 @@ export default function SignUpPage() {
             <ShieldCheck size={16} strokeWidth={2.25} />
           </div>
           <span className="text-[15px] font-semibold text-[var(--paper)] tracking-tight [font-family:var(--font-display)]">
-            PharmaSuite Core
+            RetailSuite Core
           </span>
         </div>
 
         <div className="relative z-10 max-w-md">
           <span className={eyebrow}>Workspace Provisioning Label</span>
           <h1 className="text-[32px] leading-[1.12] font-semibold text-[var(--paper)] tracking-tight mt-4 [font-family:var(--font-display)]">
-            One entry in the ledger. One verified identity.
+            Unified Commerce & Compliance Operating System.
           </h1>
           <p className="text-[13.5px] leading-relaxed text-[var(--paper)]/60 mt-4">
-            Regulatory details are recorded first. Your admin identity is then
-            bound to this workspace through Google — no separate password to
-            manage or leak.
+            Provisioning multi-tenant workspaces for Pharmaceutical distribution
+            and FMCG Grocery retail with real-time compliance auditing.
           </p>
 
           <div className="mt-8 border-t border-[var(--line-dark)] pt-5 space-y-2 [font-family:var(--font-mono)] text-[11px] text-[var(--paper)]/45">
             <div className="flex justify-between gap-6">
-              <span>FORM</span>
-              <span className="text-[var(--paper)]/70">
-                WS-REG · GOOGLE-SSO
+              <span>ACTIVE DOMAIN</span>
+              <span className="text-[var(--paper)]/70 uppercase">
+                {formData.businessCategory === "pharma"
+                  ? "Pharma Suite · Drug Control"
+                  : "Grocery Suite · FSSAI Compliance"}
               </span>
             </div>
             <div className="flex justify-between gap-6">
@@ -287,9 +308,7 @@ export default function SignUpPage() {
             </div>
             <div className="flex justify-between gap-6">
               <span>ISSUER</span>
-              <span className="text-[var(--paper)]/70">
-                PHARMASUITE COMPLIANCE ENGINE
-              </span>
+              <span className="text-[var(--paper)]/70">RETAILSUITE ENGINE</span>
             </div>
           </div>
         </div>
@@ -329,7 +348,7 @@ export default function SignUpPage() {
                 opacity="0.9"
               >
                 <textPath href="#stampRing" startOffset="2%">
-                  SECURED · GOOGLE IDENTITY · VERIFIED WORKSPACE ·
+                  SECURED · MULTI-TENANT · VERIFIED WORKSPACE ·
                 </textPath>
               </text>
             </svg>
@@ -342,9 +361,9 @@ export default function SignUpPage() {
             </div>
           </div>
           <div className="text-[11px] text-[var(--paper)]/40 [font-family:var(--font-mono)] text-right leading-relaxed">
-            © 2026 PharmaSuite
+            © 2026 RetailSuite
             <br />
-            Compliance Infrastructure
+            Enterprise Infrastructure
           </div>
         </div>
       </div>
@@ -357,8 +376,8 @@ export default function SignUpPage() {
             Register your workspace
           </h2>
           <p className="text-[13.5px] text-[var(--ink)]/55 mt-1.5 leading-relaxed">
-            Enter your compliance details, then bind an admin identity with
-            Google to finish provisioning.
+            Select your primary business category and configure regulatory
+            compliance details.
           </p>
 
           {error && (
@@ -369,6 +388,52 @@ export default function SignUpPage() {
           )}
 
           <form onSubmit={handleSignUp} className="flex flex-col gap-6 mt-7">
+            {/* SECTION: CATEGORY SELECTION */}
+            <div>
+              <label className={label}>Business Vertical</label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => handleCategoryChange("pharma")}
+                  className={`flex items-center gap-2.5 p-3 border transition-all text-left ${
+                    formData.businessCategory === "pharma"
+                      ? "border-[var(--teal-mid)] bg-[var(--teal-mid)]/10 text-[var(--teal-deep)] font-medium"
+                      : "border-[var(--line)] bg-[var(--paper)] text-[var(--ink)]/60 hover:border-[var(--ink)]/30"
+                  }`}
+                >
+                  <Pill size={18} />
+                  <div>
+                    <div className="text-[13px] leading-none font-medium">
+                      Pharma Suite
+                    </div>
+                    <div className="text-[10px] text-[var(--ink)]/50 mt-1 [font-family:var(--font-mono)]">
+                      Drug License Required
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleCategoryChange("grocery")}
+                  className={`flex items-center gap-2.5 p-3 border transition-all text-left ${
+                    formData.businessCategory === "grocery"
+                      ? "border-[var(--teal-mid)] bg-[var(--teal-mid)]/10 text-[var(--teal-deep)] font-medium"
+                      : "border-[var(--line)] bg-[var(--paper)] text-[var(--ink)]/60 hover:border-[var(--ink)]/30"
+                  }`}
+                >
+                  <ShoppingBag size={18} />
+                  <div>
+                    <div className="text-[13px] leading-none font-medium">
+                      Grocery Suite
+                    </div>
+                    <div className="text-[10px] text-[var(--ink)]/50 mt-1 [font-family:var(--font-mono)]">
+                      FSSAI License Required
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
             {/* SECTION: ENTITY */}
             <div>
               <div className="flex items-center gap-3 mb-4">
@@ -390,7 +455,11 @@ export default function SignUpPage() {
                       required
                       value={formData.workspaceCode}
                       onChange={handleInputChange}
-                      placeholder="APOLLO-HYD-01"
+                      placeholder={
+                        formData.businessCategory === "pharma"
+                          ? "APOLLO-HYD-01"
+                          : "MORE-HYD-01"
+                      }
                       className={`${inputBase} uppercase [font-family:var(--font-mono)]`}
                     />
                   </div>
@@ -409,7 +478,7 @@ export default function SignUpPage() {
                       onChange={handleInputChange}
                       className={`${inputBase} pr-8 appearance-none cursor-pointer`}
                     >
-                      {workspaceTypes.map(t => (
+                      {activeTypes.map(t => (
                         <option key={t.value} value={t.value}>
                           {t.label}
                         </option>
@@ -424,7 +493,11 @@ export default function SignUpPage() {
               </div>
 
               <div className="mt-4">
-                <label className={label}>Trading Name</label>
+                <label className={label}>
+                  {formData.businessCategory === "pharma"
+                    ? "Trading Name"
+                    : "Store / Outlet Name"}
+                </label>
                 <div className="relative">
                   <Building2
                     size={15}
@@ -432,11 +505,15 @@ export default function SignUpPage() {
                   />
                   <input
                     type="text"
-                    name="pharmacyName"
+                    name="workspaceName"
                     required
-                    value={formData.pharmacyName}
+                    value={formData.workspaceName}
                     onChange={handleInputChange}
-                    placeholder="Apollo Diagnostics & Pharma Hub"
+                    placeholder={
+                      formData.businessCategory === "pharma"
+                        ? "Apollo Diagnostics & Pharma Hub"
+                        : "FreshMart Supermarket & Organics"
+                    }
                     className={inputBase}
                   />
                 </div>
@@ -480,7 +557,11 @@ export default function SignUpPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="sm:col-span-1">
-                  <label className={label}>Drug License No.</label>
+                  <label className={label}>
+                    {formData.businessCategory === "pharma"
+                      ? "Drug License No."
+                      : "FSSAI License No."}
+                  </label>
                   <div className="relative">
                     <FileText
                       size={15}
@@ -488,11 +569,15 @@ export default function SignUpPage() {
                     />
                     <input
                       type="text"
-                      name="drugLicenseNumber"
+                      name="complianceLicenseNumber"
                       required
-                      value={formData.drugLicenseNumber}
+                      value={formData.complianceLicenseNumber}
                       onChange={handleInputChange}
-                      placeholder="TZ-HYD-123456"
+                      placeholder={
+                        formData.businessCategory === "pharma"
+                          ? "TZ-HYD-123456"
+                          : "10012011000123"
+                      }
                       className={`${inputBase} [font-family:var(--font-mono)]`}
                     />
                   </div>
@@ -573,7 +658,7 @@ export default function SignUpPage() {
                     required
                     value={formData.adminEmail}
                     onChange={handleInputChange}
-                    placeholder="priya@apollopharma.in"
+                    placeholder="priya@store.in"
                     className={`${inputBase} pl-3`}
                   />
                 </div>
@@ -623,8 +708,7 @@ export default function SignUpPage() {
               </button>
             </div>
             <p className="text-[11px] text-[var(--ink)]/40 -mt-3 [font-family:var(--font-mono)]">
-              Your password is never stored in plain text — it's hashed before
-              it reaches the database.
+              Your password is hashed before it reaches the database.
             </p>
           </form>
 

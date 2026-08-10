@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
@@ -98,108 +97,51 @@ export default function AppSidebar({
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        height: "100vh",
-        width: "100vw", //👈 FORCE the layout to use the full viewport width
-        maxWidth: "100%", //Prevent any parent containers from shrinking it
-        fontFamily: "Inter, system-ui, sans-serif",
-      }}
-    >
+    <div className="flex h-screen w-screen max-w-full font-body">
       {/* ── Sidebar ── */}
       <aside
-        style={{
-          width: collapsed ? "64px" : "240px",
-          minWidth: collapsed ? "64px" : "240px",
-          transition: "width 0.2s ease, min-width 0.2s ease",
-          display: "flex",
-          flexDirection: "column",
-          borderRight: "1px solid #e2e8f0",
-          backgroundColor: "#ffffff",
-          overflow: "hidden",
-        }}
+        className={`relative flex flex-col overflow-hidden bg-teal-deep transition-[width,min-width] duration-200 ease-out ${
+          collapsed ? "min-w-16 w-16" : "min-w-60 w-60"
+        }`}
       >
+        {/* dot grid texture */}
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.05]"
+          style={{
+            backgroundImage: "radial-gradient(#ffffff 1px, transparent 1.4px)",
+            backgroundSize: "22px 22px",
+          }}
+        />
+
         {/* Header */}
         <div
-          style={{
-            height: "64px",
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            padding: "0 12px",
-            borderBottom: "1px solid #f1f5f9",
-            flexShrink: 0,
-          }}
+          className={`relative z-10 flex h-16 shrink-0 items-center gap-2.5 border-b border-line-dark px-3 ${
+            collapsed ? "justify-center px-0" : ""
+          }`}
         >
-          <div
-            style={{
-              width: "36px",
-              height: "36px",
-              minWidth: "36px",
-              borderRadius: "8px",
-              backgroundColor: "#059669",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "#fff",
-            }}
-          >
-            <Pill size={18} />
+          <div className="flex h-9 w-9 min-w-9 items-center justify-center border border-stamp text-stamp">
+            <Pill size={18} strokeWidth={2} />
           </div>
           {!collapsed && (
-            <div style={{ overflow: "hidden" }}>
-              <div
-                style={{
-                  fontWeight: 700,
-                  fontSize: "14px",
-                  color: "#0f172a",
-                  lineHeight: 1.2,
-                  whiteSpace: "nowrap",
-                }}
-              >
+            <div className="overflow-hidden">
+              <div className="whitespace-nowrap text-[14px] font-bold leading-tight text-paper">
                 PharmaSuite
               </div>
-              <div
-                style={{
-                  fontSize: "11px",
-                  color: "#94a3b8",
-                  fontWeight: 500,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                Retail Store POS
+              <div className="whitespace-nowrap text-[10.5px] font-medium uppercase tracking-[0.14em] text-paper/45 font-mono">
+                Retail POS · Ledger
               </div>
             </div>
           )}
         </div>
 
         {/* Nav */}
-        <nav style={{ flex: 1, overflowY: "auto", padding: "8px 8px 0" }}>
+        <nav className="relative z-10 flex-1 overflow-y-auto px-2 pt-2">
           {!collapsed && (
-            <div
-              style={{
-                fontSize: "10px",
-                fontWeight: 700,
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                color: "#94a3b8",
-                padding: "8px 8px 4px",
-              }}
-            >
+            <div className="px-2 pb-1 pt-2 text-[10px] font-bold uppercase tracking-[0.18em] text-paper/35 font-mono">
               Management
             </div>
           )}
-          <ul
-            style={{
-              listStyle: "none",
-              margin: 0,
-              padding: 0,
-              display: "flex",
-              flexDirection: "column",
-              gap: "2px",
-            }}
-          >
+          <ul className="flex flex-col gap-0.5 p-0 m-0 list-none">
             {navigationItems.map(item => {
               const isActive =
                 pathname === item.url ||
@@ -220,66 +162,34 @@ export default function AppSidebar({
                       }
                     }}
                     title={collapsed ? item.title : undefined}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                      padding: collapsed ? "0 14px" : "0 10px",
-                      height: "40px",
-                      borderRadius: "8px",
-                      fontWeight: 500,
-                      fontSize: "13.5px",
-                      justifyContent: collapsed ? "center" : "flex-start",
-                      backgroundColor:
-                        isActive && !item.hasDropdown
-                          ? "#f0fdf4"
-                          : "transparent",
-                      color: isActive ? "#059669" : "#475569",
-                      transition: "background 0.15s, color 0.15s",
-                      cursor: "pointer",
-                    }}
-                    onMouseEnter={e => {
-                      if (!isActive) {
-                        e.currentTarget.style.backgroundColor = "#f8fafc";
-                        e.currentTarget.style.color = "#059669";
-                      }
-                    }}
-                    onMouseLeave={e => {
-                      if (!isActive) {
-                        e.currentTarget.style.backgroundColor = "transparent";
-                        e.currentTarget.style.color = "#475569";
-                      }
-                    }}
+                    className={`group flex h-10 cursor-pointer items-center gap-2.5 rounded-none text-[13.5px] font-medium transition-colors duration-150 ${
+                      collapsed
+                        ? "justify-center px-0"
+                        : "justify-start px-2.5"
+                    } ${
+                      isActive && !item.hasDropdown
+                        ? "bg-paper/10 text-stamp"
+                        : "text-paper/55 hover:bg-paper/10 hover:text-paper"
+                    }`}
                   >
                     <item.icon
                       size={18}
-                      style={{
-                        flexShrink: 0,
-                        color: isActive ? "#059669" : "currentColor",
-                      }}
+                      className={`shrink-0 ${
+                        isActive && !item.hasDropdown
+                          ? "text-stamp"
+                          : "text-current"
+                      }`}
+                      strokeWidth={isActive ? 2.25 : 1.8}
                     />
                     {!collapsed && (
-                      <span
-                        style={{
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                        }}
-                      >
+                      <span className="truncate overflow-hidden whitespace-nowrap">
                         {item.title}
                       </span>
                     )}
 
                     {/* Dropdown Indicator Arrow */}
                     {item.hasDropdown && !collapsed && (
-                      <div
-                        style={{
-                          marginLeft: "auto",
-                          display: "flex",
-                          alignItems: "center",
-                          color: "#94a3b8",
-                        }}
-                      >
+                      <div className="ml-auto flex items-center text-paper/40">
                         {isDropdownOpen ? (
                           <ChevronDown size={14} />
                         ) : (
@@ -289,63 +199,24 @@ export default function AppSidebar({
                     )}
 
                     {isActive && !item.hasDropdown && !collapsed && (
-                      <span
-                        style={{
-                          marginLeft: "auto",
-                          width: "4px",
-                          height: "20px",
-                          borderRadius: "2px",
-                          backgroundColor: "#059669",
-                        }}
-                      />
+                      <span className="ml-auto h-5 w-1 bg-stamp" />
                     )}
                   </div>
 
                   {/* Render Nested Submenu Items */}
                   {item.hasDropdown && isDropdownOpen && !collapsed && (
-                    <ul
-                      style={{
-                        listStyle: "none",
-                        margin: "4px 0 8px 0",
-                        padding: "0 0 0 12px",
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "2px",
-                        borderLeft: "1px solid #e2e8f0",
-                        marginLeft: "18px",
-                      }}
-                    >
+                    <ul className="m-0 ml-[18px] mb-2 mt-1 list-none border-l border-paper/20 p-0 flex flex-col gap-0.5">
                       {item.subItems?.map(subItem => {
                         const isSubActive = pathname === subItem.url;
                         return (
                           <li key={subItem.title}>
                             <div
                               onClick={() => handleNavigate(subItem.url)}
-                              style={{
-                                display: "block",
-                                padding: "6px 10px",
-                                borderRadius: "6px",
-                                fontSize: "12.5px",
-                                fontWeight: isSubActive ? 600 : 500,
-                                color: isSubActive ? "#059669" : "#64748b",
-                                transition: "color 0.1s, background 0.1s",
-                                cursor: "pointer",
-                                backgroundColor: isSubActive
-                                  ? "#f0fdf4"
-                                  : "transparent",
-                              }}
-                              onMouseEnter={e => {
-                                e.currentTarget.style.color = "#059669";
-                                e.currentTarget.style.backgroundColor =
-                                  "#f8fafc";
-                              }}
-                              onMouseLeave={e => {
-                                if (!isSubActive) {
-                                  e.currentTarget.style.color = "#64748b";
-                                  e.currentTarget.style.backgroundColor =
-                                    "transparent";
-                                }
-                              }}
+                              className={`block cursor-pointer rounded-none px-2.5 py-1.5 text-[12.5px] transition-colors duration-100 ${
+                                isSubActive
+                                  ? "bg-paper/10 font-semibold text-stamp"
+                                  : "font-medium text-paper/45 hover:bg-paper/10 hover:text-paper"
+                              }`}
                             >
                               {subItem.title}
                             </div>
@@ -361,90 +232,41 @@ export default function AppSidebar({
         </nav>
 
         {/* Footer */}
-        <div
-          style={{
-            borderTop: "1px solid #f1f5f9",
-            backgroundColor: "rgba(248,250,252,0.5)",
-            padding: "10px 8px",
-            flexShrink: 0,
-          }}
-        >
+        <div className="relative z-10 shrink-0 border-t border-line-dark p-2">
           <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              padding: "6px 8px",
-              borderRadius: "8px",
-              justifyContent: collapsed ? "center" : "flex-start",
-            }}
+            className={`flex items-center gap-2.5 rounded-none px-2 py-1.5 ${
+              collapsed ? "justify-center px-0" : "justify-start"
+            }`}
           >
             {/* Avatar */}
-            <div
-              style={{
-                width: "32px",
-                height: "32px",
-                minWidth: "32px",
-                borderRadius: "50%",
-                backgroundColor: "#dcfce7",
-                color: "#059669",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "11px",
-                fontWeight: 700,
-              }}
-            >
+            <div className="flex h-8 w-8 min-w-8 items-center justify-center border border-stamp/60 bg-stamp-dim text-[11px] font-bold text-stamp">
               {mockUser.avatarInitials}
             </div>
             {!collapsed && (
               <>
-                <div style={{ overflow: "hidden", flex: 1 }}>
-                  <div
-                    style={{
-                      fontSize: "13px",
-                      fontWeight: 600,
-                      color: "#1e293b",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
+                <div className="flex-1 overflow-hidden">
+                  <div className="truncate text-[13px] font-semibold text-paper">
                     {mockUser.fullName}
                   </div>
-                  <div
-                    style={{
-                      fontSize: "11px",
-                      color: "#94a3b8",
-                      fontWeight: 500,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
+                  <div className="truncate text-[10.5px] font-medium text-paper/40 font-mono">
                     {mockUser.email}
                   </div>
                 </div>
                 <button
                   title="Sign out"
-                  style={{
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                    color: "#94a3b8",
-                    padding: "4px",
-                    borderRadius: "4px",
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                  onMouseEnter={e => (e.currentTarget.style.color = "#ef4444")}
-                  onMouseLeave={e => (e.currentTarget.style.color = "#94a3b8")}
+                  onClick={handleLogout}
+                  className="flex cursor-pointer items-center rounded-none p-1.5 text-paper/45 transition-colors hover:text-danger"
                 >
-                  <LogOut size={15} onClick={handleLogout} />
+                  <LogOut size={15} />
                 </button>
               </>
             )}
           </div>
+          {!collapsed && (
+            <div className="mt-2 border-t border-line-dark pt-2 text-[9.5px] uppercase tracking-[0.18em] text-paper/30 font-mono">
+              Secured Session · TLS 1.3
+            </div>
+          )}
         </div>
       </aside>
 
@@ -452,50 +274,20 @@ export default function AppSidebar({
       <button
         onClick={() => setCollapsed(c => !c)}
         title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        style={{
-          position: "fixed",
-          left: collapsed ? "48px" : "224px",
-          top: "50%",
-          transform: "translateY(-50%)",
-          zIndex: 50,
-          width: "20px",
-          height: "36px",
-          borderRadius: "0 6px 6px 0",
-          border: "1px solid #e2e8f0",
-          borderLeft: "none",
-          backgroundColor: "#ffffff",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "#94a3b8",
-          transition: "left 0.2s ease",
-          boxShadow: "2px 0 6px rgba(0,0,0,0.04)",
-        }}
-        onMouseEnter={e => (e.currentTarget.style.color = "#059669")}
-        onMouseLeave={e => (e.currentTarget.style.color = "#94a3b8")}
+        className={`fixed top-1/2 z-50 flex h-9 w-5 -translate-y-1/2 cursor-pointer items-center justify-center border border-line border-l-0 bg-paper text-ink/50 shadow-[2px_0_6px_rgba(0,0,0,0.04)] transition-colors hover:text-stamp ${
+          collapsed ? "left-[60px]" : "left-[236px]"
+        }`}
       >
         <ChevronRight
           size={12}
-          style={{
-            transform: collapsed ? "rotate(0deg)" : "rotate(180deg)",
-            transition: "transform 0.2s",
-          }}
+          className={`transition-transform duration-200 ${
+            collapsed ? "rotate-0" : "rotate-180"
+          }`}
         />
       </button>
 
       {/* Main Content Window layout */}
-      <main
-        style={{
-          flex: 1, //👈 Tells flexbox to grow and consume ALL available empty space on the right
-          width: "100%", //Explicitly occupies the remainder of the layout axis
-          backgroundColor: "#f8fafc",
-          display: "flex",
-          flexDirection: "column",
-          padding: "32px",
-          overflowY: "auto", //Ensures clean scrolling inside the workspace only
-        }}
-      >
+      <main className="flex w-full flex-1 flex-col overflow-y-auto bg-paper p-8">
         {children}
       </main>
     </div>

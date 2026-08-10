@@ -1,13 +1,27 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse, type NextRequest } from "next/server";
 
 // Declare authorization routes open to the public domain
-const isPublicRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)"]);
+const PUBLIC_ROUTES = ["/sign-in", "/sign-up", "/onboarding"];
 
-export default clerkMiddleware(async (auth, request) => {
-  if (!isPublicRoute(request)) {
-    await auth.protect();
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const isPublicRoute = PUBLIC_ROUTES.some(route =>
+    pathname.startsWith(route),
+  );
+
+  // NextAuth (JWT) session cookies are set on successful sign-in
+  const hasSessionCookie = request.cookies
+    .getAll()
+    .some(cookie => cookie.name.includes("authjs.session-token"));
+
+  if (!isPublicRoute && !hasSessionCookie) {
+    const signInUrl = new URL("/sign-in", request.url);
+    signInUrl.searchParams.set("next", pathname);
+    return NextResponse.redirect(signInUrl);
   }
-});
+
+  return NextResponse.next();
+}
 
 export const config = {
   matcher: [

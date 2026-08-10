@@ -20,8 +20,7 @@ const analyticalStats = [
     change: "+12.4%",
     isPositive: true,
     icon: DollarSign,
-    iconBg: "#e0f2fe",
-    iconColor: "#0284c7",
+    accent: "bg-paper-dim text-ink/60",
   },
   {
     title: "Purchase Orders Pending",
@@ -29,8 +28,7 @@ const analyticalStats = [
     change: "3 awaiting RFQ",
     isPositive: true,
     icon: ShoppingBag,
-    iconBg: "#fef3c7",
-    iconColor: "#d97706",
+    accent: "bg-stamp-dim text-stamp",
   },
   {
     title: "Critical Low Stock Alerts",
@@ -38,8 +36,7 @@ const analyticalStats = [
     change: "Requires GRN",
     isPositive: false,
     icon: AlertTriangle,
-    iconBg: "#fee2e2",
-    iconColor: "#dc2626",
+    accent: "bg-danger-bg text-danger",
   },
   {
     title: "Active Counter Sessions",
@@ -47,8 +44,7 @@ const analyticalStats = [
     change: "Avg speed 2.4m",
     isPositive: true,
     icon: Activity,
-    iconBg: "#dcfce7",
-    iconColor: "#15803d",
+    accent: "bg-teal-mid/10 text-teal-mid",
   },
 ];
 
@@ -90,30 +86,17 @@ const recentTransactions = [
 
 export default function DashboardPage() {
   return (
-    <div
-      style={{ color: "#1e293b", fontFamily: "Inter, system-ui, sans-serif" }}
-    >
+    <div className="flex w-full flex-col gap-6">
       {/* ── Dashboard Welcoming Header ── */}
-      <div
-        style={{
-          marginBottom: "28px",
-          display: "flex",
-          justifyContent: "between",
-          alignItems: "center",
-        }}
-      >
+      <div className="flex items-center justify-between">
         <div>
-          <h2
-            style={{
-              fontSize: "24px",
-              fontWeight: 700,
-              color: "#0f172a",
-              margin: "0 0 4px 0",
-            }}
-          >
+          <span className="text-[10.5px] font-medium uppercase tracking-[0.18em] text-stamp font-mono">
+            Operations Overview
+          </span>
+          <h2 className="mt-1.5 font-display text-2xl font-semibold tracking-tight text-ink">
             Store Control Center
           </h2>
-          <p style={{ fontSize: "13.5px", color: "#64748b", margin: 0 }}>
+          <p className="mt-1 text-[13.5px] text-ink/55">
             Real-time status overview for counter billing terminals and
             purchasing lines.
           </p>
@@ -121,75 +104,31 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Metric Analytics Grid Cards ── */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-          gap: "20px",
-          marginBottom: "32px",
-        }}
-      >
+      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
         {analyticalStats.map((stat, i) => (
           <div
             key={i}
-            style={{
-              backgroundColor: "#ffffff",
-              border: "1px solid #e2e8f0",
-              borderRadius: "12px",
-              padding: "20px",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
-            }}
+            className="flex flex-col justify-between border border-line bg-white p-5"
           >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "start",
-                marginBottom: "12px",
-              }}
-            >
-              <span
-                style={{ fontSize: "13px", fontWeight: 600, color: "#64748b" }}
-              >
+            <div className="mb-3 flex items-start justify-between">
+              <span className="text-[12.5px] font-semibold uppercase tracking-[0.06em] text-ink/55 font-mono">
                 {stat.title}
               </span>
               <div
-                style={{
-                  width: "38px",
-                  height: "38px",
-                  borderRadius: "8px",
-                  backgroundColor: stat.iconBg,
-                  color: stat.iconColor,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
+                className={`flex h-9 w-9 items-center justify-center ${stat.accent}`}
               >
                 <stat.icon size={18} />
               </div>
             </div>
-            <div
-              style={{
-                fontSize: "22px",
-                fontWeight: 700,
-                color: "#0f172a",
-                marginBottom: "4px",
-              }}
-            >
+            <div className="font-display text-[22px] font-bold text-ink">
               {stat.value}
             </div>
             <div
-              style={{
-                fontSize: "12px",
-                fontWeight: 500,
-                color:
-                  stat.isPositive && !stat.title.includes("Alerts")
-                    ? "#16a34a"
-                    : "#dc2626",
-                display: "flex",
-                alignItems: "center",
-                gap: "4px",
-              }}
+              className={`mt-1 flex items-center gap-1 text-[12px] font-medium ${
+                stat.isPositive && !stat.title.includes("Alerts")
+                  ? "text-teal-mid"
+                  : "text-danger"
+              }`}
             >
               {stat.isPositive && !stat.title.includes("Alerts") ? (
                 <ArrowUpRight size={14} />
@@ -203,97 +142,46 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Two-Column Operational Layout split ── */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(450px, 1fr))",
-          gap: "24px",
-        }}
-      >
+      <div className="grid gap-6 xl:grid-cols-2">
         {/* Left Side: Recent Sales Live Stream Terminal */}
-        <div
-          style={{
-            backgroundColor: "#ffffff",
-            border: "1px solid #e2e8f0",
-            borderRadius: "12px",
-            padding: "24px",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
-          }}
-        >
-          <h3
-            style={{
-              fontSize: "16px",
-              fontWeight: 700,
-              color: "#0f172a",
-              margin: "0 0 16px 0",
-            }}
-          >
-            Live Billing Streams
-          </h3>
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "12px" }}
-          >
+        <div className="border border-line bg-white p-6">
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="font-display text-base font-bold text-ink">
+              Live Billing Streams
+            </h3>
+            <span className="flex items-center gap-1.5 text-[10.5px] font-medium uppercase tracking-[0.14em] text-teal-mid font-mono">
+              <span className="h-1.5 w-1.5 bg-stamp" /> Live
+            </span>
+          </div>
+          <div className="flex flex-col gap-3">
             {recentTransactions.map(txn => (
               <div
                 key={txn.id}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: "12px",
-                  borderRadius: "8px",
-                  border: "1px solid #f1f5f9",
-                  backgroundColor: "#f8fafc",
-                }}
+                className="flex items-center justify-between border border-line bg-paper p-3 transition-colors hover:bg-paper-dim"
               >
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "12px" }}
-                >
-                  <div
-                    style={{
-                      width: "32px",
-                      height: "32px",
-                      borderRadius: "6px",
-                      backgroundColor: "#e8f5e9",
-                      color: "#2e7d32",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center bg-teal-mid/10 text-teal-mid">
                     <Pill size={15} />
                   </div>
                   <div>
-                    <div
-                      style={{
-                        fontSize: "13.5px",
-                        fontWeight: 600,
-                        color: "#1e293b",
-                      }}
-                    >
+                    <div className="text-[13.5px] font-semibold text-ink">
                       {txn.medicine}
                     </div>
-                    <div style={{ fontSize: "11px", color: "#64748b" }}>
-                      {txn.id} • {txn.type}
+                    <div className="text-[11px] text-ink/50 font-mono">
+                      {txn.id} · {txn.type}
                     </div>
                   </div>
                 </div>
-                <div style={{ textAlign: "right" }}>
-                  <div
-                    style={{
-                      fontSize: "13.5px",
-                      fontWeight: 700,
-                      color: "#1e293b",
-                    }}
-                  >
+                <div className="text-right">
+                  <div className="text-[13.5px] font-bold text-ink">
                     {txn.amount}
                   </div>
                   <div
-                    style={{
-                      fontSize: "11px",
-                      fontWeight: 500,
-                      color: txn.status === "Completed" ? "#16a34a" : "#dc2626",
-                    }}
+                    className={`text-[11px] font-medium ${
+                      txn.status === "Completed"
+                        ? "text-teal-mid"
+                        : "text-danger"
+                    }`}
                   >
                     {txn.time}
                   </div>
@@ -304,105 +192,35 @@ export default function DashboardPage() {
         </div>
 
         {/* Right Side: Quick Sub-Module Operational Links */}
-        <div
-          style={{
-            backgroundColor: "#ffffff",
-            border: "1px solid #e2e8f0",
-            borderRadius: "12px",
-            padding: "24px",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <h3
-            style={{
-              fontSize: "16px",
-              fontWeight: 700,
-              color: "#0f172a",
-              margin: "0 0 6px 0",
-            }}
-          >
+        <div className="flex flex-col border border-line bg-white p-6">
+          <h3 className="font-display text-base font-bold text-ink">
             Quick Launch Actions
           </h3>
-          <p
-            style={{
-              fontSize: "12.5px",
-              color: "#64748b",
-              margin: "0 0 16px 0",
-            }}
-          >
+          <p className="mb-4 mt-1 text-[12.5px] text-ink/55">
             Bypass navigational channels and load active documents immediately.
           </p>
 
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "12px",
-              flex: 1,
-            }}
-          >
-            <button
-              style={{
-                border: "1px dashed #cbd5e1",
-                backgroundColor: "#fff",
-                borderRadius: "8px",
-                padding: "16px",
-                cursor: "pointer",
-                textAlign: "left",
-                transition: "border 0.2s",
-              }}
-              onMouseEnter={e =>
-                (e.currentTarget.style.borderColor = "#059669")
-              }
-              onMouseLeave={e =>
-                (e.currentTarget.style.borderColor = "#cbd5e1")
-              }
-            >
-              <div style={{ color: "#059669", marginBottom: "8px" }}>
+          <div className="grid flex-1 grid-cols-2 gap-3">
+            <button className="group cursor-pointer border border-dashed border-ink/30 bg-white p-4 text-left transition-colors hover:border-teal-mid">
+              <div className="mb-2 text-stamp">
                 <DollarSign size={18} />
               </div>
-              <div
-                style={{ fontSize: "13px", fontWeight: 600, color: "#1e293b" }}
-              >
+              <div className="text-[13px] font-semibold text-ink">
                 New Cash Bill
               </div>
-              <div
-                style={{ fontSize: "11px", color: "#64748b", marginTop: "2px" }}
-              >
+              <div className="mt-0.5 text-[11px] text-ink/50">
                 Open terminal POS
               </div>
             </button>
 
-            <button
-              style={{
-                border: "1px dashed #cbd5e1",
-                backgroundColor: "#fff",
-                borderRadius: "8px",
-                padding: "16px",
-                cursor: "pointer",
-                textAlign: "left",
-                transition: "border 0.2s",
-              }}
-              onMouseEnter={e =>
-                (e.currentTarget.style.borderColor = "#059669")
-              }
-              onMouseLeave={e =>
-                (e.currentTarget.style.borderColor = "#cbd5e1")
-              }
-            >
-              <div style={{ color: "#d97706", marginBottom: "8px" }}>
+            <button className="group cursor-pointer border border-dashed border-ink/30 bg-white p-4 text-left transition-colors hover:border-teal-mid">
+              <div className="mb-2 text-stamp">
                 <ClipboardList size={18} />
               </div>
-              <div
-                style={{ fontSize: "13px", fontWeight: 600, color: "#1e293b" }}
-              >
+              <div className="text-[13px] font-semibold text-ink">
                 Draft RFQ
               </div>
-              <div
-                style={{ fontSize: "11px", color: "#64748b", marginTop: "2px" }}
-              >
+              <div className="mt-0.5 text-[11px] text-ink/50">
                 Request supplier quotes
               </div>
             </button>

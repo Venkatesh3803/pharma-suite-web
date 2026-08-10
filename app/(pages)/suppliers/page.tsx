@@ -5,13 +5,11 @@ import {
   Search,
   Plus,
   Truck,
-  FileText,
   Clock,
   CheckCircle2,
   Building2,
   Mail,
   Phone,
-  ArrowUpRight,
   ExternalLink,
   ClipboardList,
 } from "lucide-react";
@@ -81,6 +79,15 @@ const initialPOs = [
   },
 ];
 
+const poBadge: Record<string, string> = {
+  "Fully Received": "border border-teal-mid/25 bg-teal-mid/10 text-teal-mid",
+  "Awaiting GRN": "border border-stamp/30 bg-stamp-dim text-stamp",
+  "Pending Approval": "border border-ink/25 bg-paper-dim text-ink/70",
+};
+
+const inputBase =
+  "w-full rounded-none border border-line bg-white px-3 py-2 text-[13.5px] text-ink placeholder:text-ink/35 focus:outline-none focus:border-teal-mid focus:ring-2 focus:ring-teal-mid/15 transition-all font-body";
+
 export default function SuppliersAndPOs() {
   const [activeTab, setActiveTab] = useState<"suppliers" | "pos">("suppliers");
   const [searchTerm, setSearchTerm] = useState("");
@@ -98,228 +105,79 @@ export default function SuppliersAndPOs() {
   );
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "24px",
-        width: "100%",
-      }}
-    >
+    <div className="flex w-full flex-col gap-6">
       {/* ── Header System ── */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
+      <div className="flex items-center justify-between">
         <div>
-          <h1
-            style={{
-              fontSize: "24px",
-              fontWeight: 700,
-              color: "#0f172a",
-              margin: 0,
-            }}
-          >
+          <span className="text-[10.5px] font-medium uppercase tracking-[0.18em] text-stamp font-mono">
+            Vendor Compliance Ledger
+          </span>
+          <h1 className="mt-1.5 font-display text-2xl font-semibold tracking-tight text-ink">
             Procurement & Supply Chain Engine
           </h1>
-          <p
-            style={{
-              fontSize: "14px",
-              color: "#64748b",
-              marginTop: "4px",
-              marginBottom: 0,
-            }}
-          >
+          <p className="mt-1 text-[13.5px] text-ink/55">
             Manage wholesale medical distributors, generate purchase orders, and
             track fulfillment lifecycles.
           </p>
         </div>
-        <button
-          style={{
-            padding: "10px 16px",
-            borderRadius: "8px",
-            backgroundColor: "#059669",
-            color: "#fff",
-            fontSize: "14px",
-            fontWeight: 600,
-            border: "none",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            cursor: "pointer",
-          }}
-        >
+        <button className="flex items-center gap-2 rounded-none bg-ink px-4 py-2.5 text-[13.5px] font-semibold text-paper transition-colors hover:bg-teal-deep focus:outline-none focus:ring-2 focus:ring-teal-mid/30">
           <Plus size={16} /> Raise New Purchase Order
         </button>
       </div>
 
       {/* ── Procurement Pipelines High-Level Cards ── */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-          gap: "16px",
-        }}
-      >
-        <div
-          style={{
-            backgroundColor: "#ffffff",
-            border: "1px solid #e2e8f0",
-            borderRadius: "10px",
-            padding: "16px",
-            display: "flex",
-            alignItems: "center",
-            gap: "14px",
-          }}
-        >
-          <div
-            style={{
-              width: "40px",
-              height: "40px",
-              borderRadius: "8px",
-              backgroundColor: "#f1f5f9",
-              color: "#475569",
-              display: "flex",
-              alignItems: "center",
-              justifyCentering: "center",
-              displayFlex: "flex",
-              justifyContent: "center",
-            }}
-          >
-            <Building2 size={18} style={{ alignSelf: "center" }} />
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="flex items-center gap-3.5 border border-line bg-white p-4">
+          <div className="flex h-10 w-10 items-center justify-center bg-paper-dim text-ink/60">
+            <Building2 size={18} />
           </div>
           <div>
-            <div
-              style={{ fontSize: "12px", color: "#64748b", fontWeight: 500 }}
-            >
+            <div className="text-[11px] font-semibold uppercase tracking-[0.06em] text-ink/50 font-mono">
               Contracted Suppliers
             </div>
-            <div
-              style={{ fontSize: "18px", fontWeight: 700, color: "#0f172a" }}
-            >
+            <div className="font-display text-lg font-bold text-ink">
               {initialSuppliers.length} Wholesalers
             </div>
           </div>
         </div>
-        <div
-          style={{
-            backgroundColor: "#ffffff",
-            border: "1px solid #e2e8f0",
-            borderRadius: "10px",
-            padding: "16px",
-            display: "flex",
-            alignItems: "center",
-            gap: "14px",
-          }}
-        >
-          <div
-            style={{
-              width: "40px",
-              height: "40px",
-              borderRadius: "8px",
-              backgroundColor: "#fef3c7",
-              color: "#d97706",
-              display: "flex",
-              alignItems: "center",
-              justifyCentering: "center",
-              displayFlex: "flex",
-              justifyContent: "center",
-            }}
-          >
-            <Clock size={18} style={{ alignSelf: "center" }} />
+
+        <div className="flex items-center gap-3.5 border border-line bg-white p-4">
+          <div className="flex h-10 w-10 items-center justify-center bg-stamp-dim text-stamp">
+            <Clock size={18} />
           </div>
           <div>
-            <div
-              style={{ fontSize: "12px", color: "#64748b", fontWeight: 500 }}
-            >
+            <div className="text-[11px] font-semibold uppercase tracking-[0.06em] text-ink/50 font-mono">
               Pending Sign-Off
             </div>
-            <div
-              style={{ fontSize: "18px", fontWeight: 700, color: "#d97706" }}
-            >
+            <div className="font-display text-lg font-bold text-stamp">
               1 Order
             </div>
           </div>
         </div>
-        <div
-          style={{
-            backgroundColor: "#ffffff",
-            border: "1px solid #e2e8f0",
-            borderRadius: "10px",
-            padding: "16px",
-            display: "flex",
-            alignItems: "center",
-            gap: "14px",
-          }}
-        >
-          <div
-            style={{
-              width: "40px",
-              height: "40px",
-              borderRadius: "8px",
-              backgroundColor: "#e0f2fe",
-              color: "#0284c7",
-              display: "flex",
-              alignItems: "center",
-              justifyCentering: "center",
-              displayFlex: "flex",
-              justifyContent: "center",
-            }}
-          >
-            <Truck size={18} style={{ alignSelf: "center" }} />
+
+        <div className="flex items-center gap-3.5 border border-line bg-white p-4">
+          <div className="flex h-10 w-10 items-center justify-center bg-teal-mid/10 text-teal-mid">
+            <Truck size={18} />
           </div>
           <div>
-            <div
-              style={{ fontSize: "12px", color: "#64748b", fontWeight: 500 }}
-            >
+            <div className="text-[11px] font-semibold uppercase tracking-[0.06em] text-ink/50 font-mono">
               Awaiting Warehouse GRN
             </div>
-            <div
-              style={{ fontSize: "18px", fontWeight: 700, color: "#0284c7" }}
-            >
+            <div className="font-display text-lg font-bold text-teal-mid">
               1 Pipeline
             </div>
           </div>
         </div>
-        <div
-          style={{
-            backgroundColor: "#ffffff",
-            border: "1px solid #e2e8f0",
-            borderRadius: "10px",
-            padding: "16px",
-            display: "flex",
-            alignItems: "center",
-            gap: "14px",
-          }}
-        >
-          <div
-            style={{
-              width: "40px",
-              height: "40px",
-              borderRadius: "8px",
-              backgroundColor: "#dcfce7",
-              color: "#16a34a",
-              display: "flex",
-              alignItems: "center",
-              justifyCentering: "center",
-              displayFlex: "flex",
-              justifyContent: "center",
-            }}
-          >
-            <CheckCircle2 size={18} style={{ alignSelf: "center" }} />
+
+        <div className="flex items-center gap-3.5 border border-line bg-white p-4">
+          <div className="flex h-10 w-10 items-center justify-center bg-teal-mid/10 text-teal-mid">
+            <CheckCircle2 size={18} />
           </div>
           <div>
-            <div
-              style={{ fontSize: "12px", color: "#64748b", fontWeight: 500 }}
-            >
+            <div className="text-[11px] font-semibold uppercase tracking-[0.06em] text-ink/50 font-mono">
               Fulfilled This Month
             </div>
-            <div
-              style={{ fontSize: "18px", fontWeight: 700, color: "#16a34a" }}
-            >
+            <div className="font-display text-lg font-bold text-teal-mid">
               28 Batches
             </div>
           </div>
@@ -327,48 +185,19 @@ export default function SuppliersAndPOs() {
       </div>
 
       {/* ── Segment Controller & Action Row ── */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          backgroundColor: "#ffffff",
-          border: "1px solid #e2e8f0",
-          borderRadius: "10px",
-          padding: "12px",
-        }}
-      >
+      <div className="flex items-center justify-between gap-3 border border-line bg-white p-3">
         {/* Tab Selection */}
-        <div
-          style={{
-            display: "flex",
-            gap: "4px",
-            backgroundColor: "#f1f5f9",
-            padding: "4px",
-            borderRadius: "8px",
-          }}
-        >
+        <div className="flex gap-1 rounded-none bg-paper-dim p-1">
           <button
             onClick={() => {
               setActiveTab("suppliers");
               setSearchTerm("");
             }}
-            style={{
-              padding: "6px 16px",
-              borderRadius: "6px",
-              border: "none",
-              fontSize: "13px",
-              fontWeight: 600,
-              cursor: "pointer",
-              backgroundColor:
-                activeTab === "suppliers" ? "#ffffff" : "transparent",
-              color: activeTab === "suppliers" ? "#0f172a" : "#64748b",
-              boxShadow:
-                activeTab === "suppliers"
-                  ? "0 1px 3px rgba(0,0,0,0.1)"
-                  : "none",
-              transition: "all 0.15s",
-            }}
+            className={`cursor-pointer rounded-none px-4 py-1.5 text-[13px] font-semibold transition-colors ${
+              activeTab === "suppliers"
+                ? "bg-white text-ink shadow-sm"
+                : "text-ink/50 hover:text-ink"
+            }`}
           >
             Registered Suppliers
           </button>
@@ -377,35 +206,21 @@ export default function SuppliersAndPOs() {
               setActiveTab("pos");
               setSearchTerm("");
             }}
-            style={{
-              padding: "6px 16px",
-              borderRadius: "6px",
-              border: "none",
-              fontSize: "13px",
-              fontWeight: 600,
-              cursor: "pointer",
-              backgroundColor: activeTab === "pos" ? "#ffffff" : "transparent",
-              color: activeTab === "pos" ? "#0f172a" : "#64748b",
-              boxShadow:
-                activeTab === "pos" ? "0 1px 3px rgba(0,0,0,0.1)" : "none",
-              transition: "all 0.15s",
-            }}
+            className={`cursor-pointer rounded-none px-4 py-1.5 text-[13px] font-semibold transition-colors ${
+              activeTab === "pos"
+                ? "bg-white text-ink shadow-sm"
+                : "text-ink/50 hover:text-ink"
+            }`}
           >
             Purchase Orders History
           </button>
         </div>
 
         {/* Dynamic Search Box Input */}
-        <div style={{ position: "relative", width: "300px" }}>
+        <div className="relative w-[300px]">
           <Search
             size={15}
-            style={{
-              position: "absolute",
-              left: "10px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              color: "#94a3b8",
-            }}
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 text-ink/40"
           />
           <input
             type="text"
@@ -416,101 +231,35 @@ export default function SuppliersAndPOs() {
             }
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "6px 10px 6px 32px",
-              borderRadius: "6px",
-              border: "1px solid #cbd5e1",
-              fontSize: "13px",
-              outline: "none",
-              fontFamily: "inherit",
-            }}
+            className={`${inputBase} pl-8`}
           />
         </div>
       </div>
 
       {/* ── Content View Blocks ── */}
-      <div
-        style={{
-          backgroundColor: "#ffffff",
-          border: "1px solid #e2e8f0",
-          borderRadius: "12px",
-          overflow: "hidden",
-        }}
-      >
+      <div className="overflow-hidden border border-line bg-white">
         {/* RENDER TABLE 1: SUPPLIERS PANEL */}
         {activeTab === "suppliers" && (
-          <div style={{ overflowX: "auto" }}>
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                textAlign: "left",
-                fontSize: "13.5px",
-              }}
-            >
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-left text-[13.5px]">
               <thead>
-                <tr
-                  style={{
-                    backgroundColor: "#f8fafc",
-                    borderBottom: "1px solid #e2e8f0",
-                  }}
-                >
-                  <th
-                    style={{
-                      padding: "14px 16px",
-                      color: "#475569",
-                      fontWeight: 600,
-                    }}
-                  >
+                <tr className="border-b border-line bg-paper-dim">
+                  <th className="px-4 py-3.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/55">
                     Supplier Details
                   </th>
-                  <th
-                    style={{
-                      padding: "14px 16px",
-                      color: "#475569",
-                      fontWeight: 600,
-                    }}
-                  >
+                  <th className="px-4 py-3.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/55">
                     Key Point of Contact
                   </th>
-                  <th
-                    style={{
-                      padding: "14px 16px",
-                      color: "#475569",
-                      fontWeight: 600,
-                    }}
-                  >
+                  <th className="px-4 py-3.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/55">
                     Communication Details
                   </th>
-                  <th
-                    style={{
-                      padding: "14px 16px",
-                      color: "#475569",
-                      fontWeight: 600,
-                      textAlign: "center",
-                    }}
-                  >
+                  <th className="px-4 py-3.5 text-center font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/55">
                     Active POs
                   </th>
-                  <th
-                    style={{
-                      padding: "14px 16px",
-                      color: "#475569",
-                      fontWeight: 600,
-                      textAlign: "right",
-                    }}
-                  >
+                  <th className="px-4 py-3.5 text-right font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/55">
                     Total Gross Outlay
                   </th>
-                  <th
-                    style={{
-                      padding: "14px 16px",
-                      color: "#475569",
-                      fontWeight: 600,
-                      textAlign: "center",
-                    }}
-                  >
+                  <th className="px-4 py-3.5 text-center font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/55">
                     Rating
                   </th>
                 </tr>
@@ -519,97 +268,41 @@ export default function SuppliersAndPOs() {
                 {filteredSuppliers.map(sup => (
                   <tr
                     key={sup.id}
-                    style={{ borderBottom: "1px solid #f1f5f9" }}
-                    onMouseEnter={e =>
-                      (e.currentTarget.style.backgroundColor = "#f8fafc")
-                    }
-                    onMouseLeave={e =>
-                      (e.currentTarget.style.backgroundColor = "transparent")
-                    }
+                    className="border-b border-line/60 transition-colors hover:bg-paper/70"
                   >
-                    <td style={{ padding: "14px 16px" }}>
-                      <div style={{ fontWeight: 600, color: "#0f172a" }}>
-                        {sup.name}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "11px",
-                          color: "#94a3b8",
-                          marginTop: "2px",
-                        }}
-                      >
+                    <td className="px-4 py-3.5">
+                      <div className="font-semibold text-ink">{sup.name}</div>
+                      <div className="mt-0.5 text-[11px] text-ink/40 font-mono">
                         ID: {sup.id}
                       </div>
                     </td>
-                    <td
-                      style={{
-                        padding: "14px 16px",
-                        color: "#334155",
-                        fontWeight: 500,
-                      }}
-                    >
+                    <td className="px-4 py-3.5 font-medium text-ink/70">
                       {sup.contactPerson}
                     </td>
-                    <td style={{ padding: "14px 16px", color: "#475569" }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "4px",
-                          fontSize: "12px",
-                        }}
-                      >
-                        <Phone size={12} color="#94a3b8" /> {sup.phone}
+                    <td className="px-4 py-3.5 text-ink/60">
+                      <div className="flex items-center gap-1 text-[12px]">
+                        <Phone size={12} className="text-ink/40" /> {sup.phone}
                       </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "4px",
-                          fontSize: "12px",
-                          marginTop: "2px",
-                          color: "#64748b",
-                        }}
-                      >
-                        <Mail size={12} color="#94a3b8" /> {sup.email}
+                      <div className="mt-0.5 flex items-center gap-1 text-[12px] text-ink/50">
+                        <Mail size={12} className="text-ink/40" /> {sup.email}
                       </div>
                     </td>
-                    <td style={{ padding: "14px 16px", textAlign: "center" }}>
+                    <td className="px-4 py-3.5 text-center">
                       <span
-                        style={{
-                          padding: "2px 8px",
-                          borderRadius: "12px",
-                          fontSize: "12px",
-                          fontWeight: 600,
-                          backgroundColor:
-                            sup.activePOs > 0 ? "#e0f2fe" : "#f1f5f9",
-                          color: sup.activePOs > 0 ? "#0369a1" : "#475569",
-                        }}
+                        className={`px-2 py-0.5 text-[12px] font-semibold ${
+                          sup.activePOs > 0
+                            ? "border border-teal-mid/25 bg-teal-mid/10 text-teal-mid"
+                            : "border border-line bg-paper-dim text-ink/50"
+                        }`}
                       >
                         {sup.activePOs} running
                       </span>
                     </td>
-                    <td
-                      style={{
-                        padding: "14px 16px",
-                        textAlign: "right",
-                        fontWeight: 600,
-                        color: "#0f172a",
-                      }}
-                    >
+                    <td className="px-4 py-3.5 text-right font-mono font-semibold text-ink">
                       {sup.totalSpent}
                     </td>
-                    <td style={{ padding: "14px 16px", textAlign: "center" }}>
-                      <span
-                        style={{
-                          fontWeight: 700,
-                          color: "#ca8a04",
-                          backgroundColor: "#fef9c3",
-                          padding: "2px 6px",
-                          borderRadius: "4px",
-                          fontSize: "11px",
-                        }}
-                      >
+                    <td className="px-4 py-3.5 text-center">
+                      <span className="rounded-none bg-stamp-dim px-2 py-0.5 text-[11px] font-bold text-stamp font-mono">
                         ★ {sup.rating}
                       </span>
                     </td>
@@ -622,187 +315,69 @@ export default function SuppliersAndPOs() {
 
         {/* RENDER TABLE 2: PURCHASE ORDERS HISTORY PANEL */}
         {activeTab === "pos" && (
-          <div style={{ overflowX: "auto" }}>
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                textAlign: "left",
-                fontSize: "13.5px",
-              }}
-            >
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-left text-[13.5px]">
               <thead>
-                <tr
-                  style={{
-                    backgroundColor: "#f8fafc",
-                    borderBottom: "1px solid #e2e8f0",
-                  }}
-                >
-                  <th
-                    style={{
-                      padding: "14px 16px",
-                      color: "#475569",
-                      fontWeight: 600,
-                    }}
-                  >
+                <tr className="border-b border-line bg-paper-dim">
+                  <th className="px-4 py-3.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/55">
                     PO Number
                   </th>
-                  <th
-                    style={{
-                      padding: "14px 16px",
-                      color: "#475569",
-                      fontWeight: 600,
-                    }}
-                  >
+                  <th className="px-4 py-3.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/55">
                     Target Vendor Distributor
                   </th>
-                  <th
-                    style={{
-                      padding: "14px 16px",
-                      color: "#475569",
-                      fontWeight: 600,
-                    }}
-                  >
+                  <th className="px-4 py-3.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/55">
                     Order Date
                   </th>
-                  <th
-                    style={{
-                      padding: "14px 16px",
-                      color: "#475569",
-                      fontWeight: 600,
-                    }}
-                  >
+                  <th className="px-4 py-3.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/55">
                     Est. Delivery
                   </th>
-                  <th
-                    style={{
-                      padding: "14px 16px",
-                      color: "#475569",
-                      fontWeight: 600,
-                    }}
-                  >
+                  <th className="px-4 py-3.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/55">
                     Line Elements
                   </th>
-                  <th
-                    style={{
-                      padding: "14px 16px",
-                      color: "#475569",
-                      fontWeight: 600,
-                      textAlign: "right",
-                    }}
-                  >
+                  <th className="px-4 py-3.5 text-right font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/55">
                     Total Amount
                   </th>
-                  <th
-                    style={{
-                      padding: "14px 16px",
-                      color: "#475569",
-                      fontWeight: 600,
-                      textAlign: "center",
-                    }}
-                  >
+                  <th className="px-4 py-3.5 text-center font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/55">
                     Fulfillment Status
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {filteredPOs.map(po => {
-                  const badgeStyles =
-                    po.status === "Fully Received"
-                      ? { bg: "#dcfce7", text: "#15803d" }
-                      : po.status === "Awaiting GRN"
-                        ? { bg: "#e0f2fe", text: "#0369a1" }
-                        : { bg: "#fef3c7", text: "#b45309" };
-
-                  return (
-                    <tr
-                      key={po.poNo}
-                      style={{ borderBottom: "1px solid #f1f5f9" }}
-                      onMouseEnter={e =>
-                        (e.currentTarget.style.backgroundColor = "#f8fafc")
-                      }
-                      onMouseLeave={e =>
-                        (e.currentTarget.style.backgroundColor = "transparent")
-                      }
-                    >
-                      <td
-                        style={{
-                          padding: "14px 16px",
-                          fontWeight: 600,
-                          color: "#0f172a",
-                          fontFamily: "monospace",
-                        }}
+                {filteredPOs.map(po => (
+                  <tr
+                    key={po.poNo}
+                    className="border-b border-line/60 transition-colors hover:bg-paper/70"
+                  >
+                    <td className="px-4 py-3.5 font-mono font-semibold text-ink">
+                      <div className="group flex cursor-pointer items-center gap-1 transition-colors hover:text-stamp">
+                        {po.poNo} <ExternalLink size={12} className="opacity-50" />
+                      </div>
+                    </td>
+                    <td className="px-4 py-3.5 font-medium text-ink/70">
+                      {po.supplier}
+                    </td>
+                    <td className="px-4 py-3.5 text-ink/50">{po.orderDate}</td>
+                    <td className="px-4 py-3.5 text-ink/50">
+                      {po.deliveryDate}
+                    </td>
+                    <td className="px-4 py-3.5 font-medium text-ink/60">
+                      {po.itemsCount} variations
+                    </td>
+                    <td className="px-4 py-3.5 text-right font-mono font-bold text-ink">
+                      {po.totalAmount}
+                    </td>
+                    <td className="px-4 py-3.5 text-center">
+                      <span
+                        className={`inline-block px-2.5 py-1 text-[11.5px] font-semibold ${
+                          poBadge[po.status] ||
+                          "border border-line bg-paper-dim text-ink/60"
+                        }`}
                       >
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            cursor: "pointer",
-                          }}
-                          onMouseEnter={e =>
-                            (e.currentTarget.style.color = "#059669")
-                          }
-                          onMouseLeave={e =>
-                            (e.currentTarget.style.color = "#0f172a")
-                          }
-                        >
-                          {po.poNo}{" "}
-                          <ExternalLink size={12} style={{ opacity: 0.5 }} />
-                        </div>
-                      </td>
-                      <td
-                        style={{
-                          padding: "14px 16px",
-                          fontWeight: 500,
-                          color: "#334155",
-                        }}
-                      >
-                        {po.supplier}
-                      </td>
-                      <td style={{ padding: "14px 16px", color: "#64748b" }}>
-                        {po.orderDate}
-                      </td>
-                      <td style={{ padding: "14px 16px", color: "#64748b" }}>
-                        {po.deliveryDate}
-                      </td>
-                      <td
-                        style={{
-                          padding: "14px 16px",
-                          color: "#475569",
-                          fontWeight: 500,
-                        }}
-                      >
-                        {po.itemsCount} variations
-                      </td>
-                      <td
-                        style={{
-                          padding: "14px 16px",
-                          textAlign: "right",
-                          fontWeight: 700,
-                          color: "#0f172a",
-                        }}
-                      >
-                        {po.totalAmount}
-                      </td>
-                      <td style={{ padding: "14px 16px", textAlign: "center" }}>
-                        <span
-                          style={{
-                            display: "inline-block",
-                            padding: "4px 10px",
-                            borderRadius: "20px",
-                            fontSize: "12px",
-                            fontWeight: 600,
-                            backgroundColor: badgeStyles.bg,
-                            color: badgeStyles.text,
-                          }}
-                        >
-                          {po.status}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })}
+                        {po.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -811,14 +386,9 @@ export default function SuppliersAndPOs() {
         {/* Fallback View when search returns empty array results */}
         {((activeTab === "suppliers" && filteredSuppliers.length === 0) ||
           (activeTab === "pos" && filteredPOs.length === 0)) && (
-          <div
-            style={{ padding: "48px", textAlign: "center", color: "#94a3b8" }}
-          >
-            <ClipboardList
-              size={32}
-              style={{ margin: "0 auto 12px", opacity: 0.4 }}
-            />
-            <div style={{ fontSize: "14px" }}>
+          <div className="px-12 py-12 text-center text-ink/40">
+            <ClipboardList size={32} className="mx-auto mb-3 opacity-40" />
+            <div className="text-[14px]">
               No procurement elements or record files discovered matching your
               search term.
             </div>

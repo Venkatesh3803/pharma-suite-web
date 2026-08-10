@@ -2,7 +2,6 @@
 
 import React from "react";
 import {
-  TrendingUp,
   DollarSign,
   ShoppingCart,
   CreditCard,
@@ -20,8 +19,7 @@ const stats = [
     change: "+14.2%",
     isPositive: true,
     icon: DollarSign,
-    iconBg: "#e0f2fe",
-    iconColor: "#0284c7",
+    accent: "bg-paper-dim text-ink/60",
   },
   {
     title: "Sales Invoices Issued",
@@ -29,8 +27,7 @@ const stats = [
     change: "+8.4%",
     isPositive: true,
     icon: ShoppingCart,
-    iconBg: "#dcfce7",
-    iconColor: "#16a34a",
+    accent: "bg-teal-mid/10 text-teal-mid",
   },
   {
     title: "Average Ticket Size",
@@ -38,8 +35,7 @@ const stats = [
     change: "-2.1%",
     isPositive: false,
     icon: CreditCard,
-    iconBg: "#fef3c7",
-    iconColor: "#d97706",
+    accent: "bg-stamp-dim text-stamp",
   },
   {
     title: "Pending Counter Credit",
@@ -47,8 +43,7 @@ const stats = [
     change: "3 Accounts",
     isPositive: true,
     icon: Activity,
-    iconBg: "#ffeeec",
-    iconColor: "#dc2626",
+    accent: "bg-danger-bg text-danger",
   },
 ];
 
@@ -122,171 +117,81 @@ const topMovingMedicines = [
   },
 ];
 
+const badgeStyles: Record<string, string> = {
+  Paid: "bg-teal-mid/10 text-teal-mid border border-teal-mid/25",
+  Due: "bg-stamp-dim text-stamp border border-stamp/25",
+};
+
+const stockBadgeStyles: Record<string, string> = {
+  Healthy: "text-teal-mid",
+  "Low Stock": "text-stamp",
+  Critical: "text-danger",
+};
+
 export default function SalesDashboard() {
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "24px",
-        width: "100%",
-      }}
-    >
+    <div className="flex w-full flex-col gap-6">
       {/* ── Header Area ── */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
+      <div className="flex items-center justify-between">
         <div>
-          <h1
-            style={{
-              fontSize: "24px",
-              fontWeight: 700,
-              color: "#0f172a",
-              margin: 0,
-            }}
-          >
+          <span className="text-[10.5px] font-medium uppercase tracking-[0.18em] text-stamp font-mono">
+            Retail Performance Ledger
+          </span>
+          <h1 className="mt-1.5 font-display text-2xl font-semibold tracking-tight text-ink">
             Sales Analysis Workstation
           </h1>
-          <p
-            style={{
-              fontSize: "14px",
-              color: "#64748b",
-              marginTop: "4px",
-              marginBottom: 0,
-            }}
-          >
+          <p className="mt-1 text-[13.5px] text-ink/55">
             Real-time retail metrics, counter ledger settlements, and stock
             clearance velocities.
           </p>
         </div>
-        <div style={{ display: "flex", gap: "12px" }}>
-          <select
-            style={{
-              padding: "8px 12px",
-              borderRadius: "6px",
-              border: "1px solid #e2e8f0",
-              backgroundColor: "#fff",
-              fontSize: "14px",
-              fontWeight: 500,
-              color: "#475569",
-              outline: "none",
-              cursor: "pointer",
-            }}
-          >
+        <div className="flex gap-3">
+          <select className="cursor-pointer rounded-none border border-line bg-white px-3 py-2 text-[13.5px] font-medium text-ink/70 focus:outline-none focus:border-teal-mid focus:ring-2 focus:ring-teal-mid/15">
             <option>Terminal: All Registers</option>
             <option>Counter Terminal 01</option>
             <option>Counter Terminal 02</option>
           </select>
-          <div
-            style={{
-              padding: "8px 16px",
-              borderRadius: "6px",
-              backgroundColor: "#059669",
-              color: "#fff",
-              fontSize: "14px",
-              fontWeight: 600,
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-            }}
-          >
-            Today
+          <div className="flex items-center gap-1.5 border border-ink bg-ink px-4 py-2 text-[13.5px] font-semibold text-paper">
+            <span className="h-1.5 w-1.5 bg-stamp" /> Today
           </div>
         </div>
       </div>
 
       {/* ── Stats Metric Grid ── */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-          gap: "20px",
-          width: "100%",
-        }}
-      >
+      <div className="grid w-full gap-5 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat, idx) => (
           <div
             key={idx}
-            style={{
-              backgroundColor: "#ffffff",
-              border: "1px solid #e2e8f0",
-              borderRadius: "12px",
-              padding: "20px",
-              display: "flex",
-              flexDirection: "column",
-              gap: "12px",
-            }}
+            className="flex flex-col gap-3 border border-line bg-white p-5"
           >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "13.5px",
-                  fontWeight: 500,
-                  color: "#64748b",
-                }}
-              >
+            <div className="flex items-start justify-between">
+              <span className="text-[12.5px] font-semibold uppercase tracking-[0.06em] text-ink/55 font-mono">
                 {stat.title}
               </span>
               <div
-                style={{
-                  width: "38px",
-                  height: "38px",
-                  borderRadius: "8px",
-                  backgroundColor: stat.iconBg,
-                  color: stat.iconColor,
-                  display: "flex",
-                  alignItems: "center",
-                }}
+                className={`flex h-9 w-9 items-center justify-center ${stat.accent}`}
               >
-                <stat.icon size={18} style={{ alignSelf: "center" }} />
+                <stat.icon size={18} />
               </div>
             </div>
             <div>
-              <div
-                style={{
-                  fontSize: "22px",
-                  fontWeight: 700,
-                  color: "#0f172a",
-                  letterSpacing: "-0.02em",
-                }}
-              >
+              <div className="font-display text-[22px] font-bold tracking-tight text-ink">
                 {stat.value}
               </div>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
-                  marginTop: "4px",
-                }}
-              >
+              <div className="mt-1 flex items-center gap-1">
                 {stat.isPositive ? (
-                  <ArrowUpRight size={14} color="#16a34a" />
+                  <ArrowUpRight size={14} className="text-teal-mid" />
                 ) : (
-                  <ArrowDownRight size={14} color="#dc2626" />
+                  <ArrowDownRight size={14} className="text-danger" />
                 )}
                 <span
-                  style={{
-                    fontSize: "12px",
-                    fontWeight: 600,
-                    color: stat.isPositive ? "#16a34a" : "#dc2626",
-                  }}
+                  className={`text-[12px] font-semibold ${
+                    stat.isPositive ? "text-teal-mid" : "text-danger"
+                  }`}
                 >
                   {stat.change}
                 </span>
-                <span style={{ fontSize: "11px", color: "#94a3b8" }}>
-                  vs yesterday
-                </span>
+                <span className="text-[11px] text-ink/40">vs yesterday</span>
               </div>
             </div>
           </div>
@@ -294,112 +199,37 @@ export default function SalesDashboard() {
       </div>
 
       {/* ── Main Dashboard Split Columns ── */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(450px, 1fr))",
-          gap: "24px",
-          width: "100%",
-        }}
-      >
+      <div className="grid w-full gap-6 xl:grid-cols-2">
         {/* Left Column: Recent Counter Transactions */}
-        <div
-          style={{
-            backgroundColor: "#ffffff",
-            border: "1px solid #e2e8f0",
-            borderRadius: "12px",
-            padding: "20px",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "16px",
-            }}
-          >
+        <div className="flex flex-col border border-line bg-white p-5">
+          <div className="mb-4 flex items-center justify-between">
             <div>
-              <h3
-                style={{
-                  fontSize: "16px",
-                  fontWeight: 600,
-                  color: "#0f172a",
-                  margin: 0,
-                }}
-              >
+              <h3 className="font-display text-base font-bold text-ink">
                 Live Terminal Invoices
               </h3>
-              <p
-                style={{
-                  fontSize: "12px",
-                  color: "#94a3b8",
-                  margin: "2px 0 0 0",
-                }}
-              >
+              <p className="mt-0.5 text-[12px] text-ink/45">
                 Instant view of running retail transactions
               </p>
             </div>
-            <span
-              style={{
-                fontSize: "12px",
-                color: "#059669",
-                fontWeight: 500,
-                cursor: "pointer",
-              }}
-            >
+            <span className="cursor-pointer text-[12px] font-medium text-stamp hover:text-teal-mid">
               View All Invoices
             </span>
           </div>
 
-          <div style={{ overflowX: "auto" }}>
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                textAlign: "left",
-                fontSize: "13px",
-              }}
-            >
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-left text-[13px]">
               <thead>
-                <tr style={{ borderBottom: "1px solid #f1f5f9" }}>
-                  <th
-                    style={{
-                      padding: "10px 8px",
-                      color: "#64748b",
-                      fontWeight: 600,
-                    }}
-                  >
+                <tr className="border-b border-line">
+                  <th className="px-2 py-2.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/50">
                     Invoice ID
                   </th>
-                  <th
-                    style={{
-                      padding: "10px 8px",
-                      color: "#64748b",
-                      fontWeight: 600,
-                    }}
-                  >
+                  <th className="px-2 py-2.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/50">
                     Customer
                   </th>
-                  <th
-                    style={{
-                      padding: "10px 8px",
-                      color: "#64748b",
-                      fontWeight: 600,
-                    }}
-                  >
+                  <th className="px-2 py-2.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/50">
                     Payment
                   </th>
-                  <th
-                    style={{
-                      padding: "10px 8px",
-                      color: "#64748b",
-                      fontWeight: 600,
-                      textAlign: "right",
-                    }}
-                  >
+                  <th className="px-2 py-2.5 text-right font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/50">
                     Total Amount
                   </th>
                 </tr>
@@ -408,56 +238,33 @@ export default function SalesDashboard() {
                 {recentSales.map(sale => (
                   <tr
                     key={sale.id}
-                    style={{ borderBottom: "1px solid #f8fafc" }}
+                    className="border-b border-line/60 transition-colors hover:bg-paper/70"
                   >
-                    <td
-                      style={{
-                        padding: "12px 8px",
-                        fontWeight: 600,
-                        color: "#0f172a",
-                      }}
-                    >
-                      <div>{sale.id}</div>
-                      <div
-                        style={{
-                          fontSize: "11px",
-                          color: "#94a3b8",
-                          fontWeight: 400,
-                        }}
-                      >
+                    <td className="px-2 py-3">
+                      <div className="font-mono font-semibold text-ink">
+                        {sale.id}
+                      </div>
+                      <div className="text-[11px] font-normal text-ink/40">
                         {sale.time}
                       </div>
                     </td>
-                    <td style={{ padding: "12px 8px", color: "#334155" }}>
+                    <td className="px-2 py-3 text-ink/70">
                       <div>{sale.customer}</div>
-                      <div style={{ fontSize: "11px", color: "#94a3b8" }}>
+                      <div className="text-[11px] text-ink/40">
                         {sale.items} line items
                       </div>
                     </td>
-                    <td style={{ padding: "12px 8px" }}>
+                    <td className="px-2 py-3">
                       <span
-                        style={{
-                          display: "inline-block",
-                          padding: "2px 6px",
-                          borderRadius: "4px",
-                          fontSize: "11px",
-                          fontWeight: 600,
-                          backgroundColor:
-                            sale.status === "Paid" ? "#dcfce7" : "#fee2e2",
-                          color: sale.status === "Paid" ? "#15803d" : "#b91c1c",
-                        }}
+                        className={`inline-block px-2 py-0.5 text-[11px] font-semibold ${
+                          badgeStyles[sale.status] ||
+                          "border border-line bg-paper-dim text-ink/60"
+                        }`}
                       >
                         {sale.method}
                       </span>
                     </td>
-                    <td
-                      style={{
-                        padding: "12px 8px",
-                        textAlign: "right",
-                        fontWeight: 600,
-                        color: "#0f172a",
-                      }}
-                    >
+                    <td className="px-2 py-3 text-right font-mono font-semibold text-ink">
                       {sale.total}
                     </td>
                   </tr>
@@ -468,126 +275,46 @@ export default function SalesDashboard() {
         </div>
 
         {/* Right Column: Top Moving Inventory Stock */}
-        <div
-          style={{
-            backgroundColor: "#ffffff",
-            border: "1px solid #e2e8f0",
-            borderRadius: "12px",
-            padding: "20px",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "16px",
-            }}
-          >
+        <div className="flex flex-col border border-line bg-white p-5">
+          <div className="mb-4 flex items-center justify-between">
             <div>
-              <h3
-                style={{
-                  fontSize: "16px",
-                  fontWeight: 600,
-                  color: "#0f172a",
-                  margin: 0,
-                }}
-              >
+              <h3 className="font-display text-base font-bold text-ink">
                 Top High-Velocity Elements
               </h3>
-              <p
-                style={{
-                  fontSize: "12px",
-                  color: "#94a3b8",
-                  margin: "2px 0 0 0",
-                }}
-              >
+              <p className="mt-0.5 text-[12px] text-ink/45">
                 Fastest moving pharmaceutical SKUs today
               </p>
             </div>
-            <span
-              style={{
-                fontSize: "12px",
-                color: "#059669",
-                fontWeight: 500,
-                cursor: "pointer",
-              }}
-            >
+            <span className="cursor-pointer text-[12px] font-medium text-stamp hover:text-teal-mid">
               Analyze Velocity
             </span>
           </div>
 
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "14px" }}
-          >
+          <div className="flex flex-col gap-3.5">
             {topMovingMedicines.map((med, idx) => (
               <div
                 key={idx}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: "10px",
-                  borderRadius: "8px",
-                  border: "1px solid #f1f5f9",
-                }}
+                className="flex items-center justify-between border border-line bg-paper p-2.5 transition-colors hover:bg-paper-dim"
               >
-                <div
-                  style={{ display: "flex", gap: "12px", alignItems: "center" }}
-                >
-                  <div
-                    style={{
-                      width: "32px",
-                      height: "32px",
-                      borderRadius: "6px",
-                      backgroundColor: "#f8fafc",
-                      border: "1px solid #e2e8f0",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      color: "#64748b",
-                    }}
-                  >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center border border-line bg-white text-ink/50">
                     <Package size={16} />
                   </div>
                   <div>
-                    <div
-                      style={{
-                        fontSize: "13px",
-                        fontWeight: 600,
-                        color: "#1e293b",
-                      }}
-                    >
+                    <div className="text-[13px] font-semibold text-ink">
                       {med.name}
                     </div>
-                    <div style={{ fontSize: "11px", color: "#94a3b8" }}>
-                      {med.category}
-                    </div>
+                    <div className="text-[11px] text-ink/40">{med.category}</div>
                   </div>
                 </div>
-                <div style={{ textAlign: "right" }}>
-                  <div
-                    style={{
-                      fontSize: "13px",
-                      fontWeight: 700,
-                      color: "#0f172a",
-                    }}
-                  >
+                <div className="text-right">
+                  <div className="font-mono text-[13px] font-bold text-ink">
                     {med.unitsSold} units
                   </div>
                   <div
-                    style={{
-                      fontSize: "11px",
-                      fontWeight: 500,
-                      color:
-                        med.status === "Critical"
-                          ? "#dc2626"
-                          : med.status === "Low Stock"
-                            ? "#d97706"
-                            : "#64748b",
-                    }}
+                    className={`text-[11px] font-medium ${
+                      stockBadgeStyles[med.status] || "text-ink/50"
+                    }`}
                   >
                     {med.stockLeft} left ({med.status})
                   </div>

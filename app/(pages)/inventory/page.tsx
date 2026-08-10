@@ -11,7 +11,6 @@ import {
   Package,
   Layers,
   Calendar,
-  DollarSign,
 } from "lucide-react";
 
 // Mock Data for Pharmaceutical Inventory
@@ -90,6 +89,12 @@ const initialInventory = [
   },
 ];
 
+const statusBadge: Record<string, string> = {
+  Healthy: "border border-teal-mid/25 bg-teal-mid/10 text-teal-mid",
+  "Low Stock": "border border-stamp/30 bg-stamp-dim text-stamp",
+  "Out of Stock": "border border-danger/25 bg-danger-bg text-danger",
+};
+
 export default function MedicineInventory() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -119,224 +124,83 @@ export default function MedicineInventory() {
     i => i.status === "Healthy",
   ).length;
 
+  const inputBase =
+    "w-full rounded-none border border-line bg-white px-3 py-2 text-[13.5px] text-ink placeholder:text-ink/35 focus:outline-none focus:border-teal-mid focus:ring-2 focus:ring-teal-mid/15 transition-all font-body";
+
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        gap: "24px",
-        width: "100%",
-      }}
-    >
+    <div className="flex w-full flex-col gap-6">
       {/* ── Header System ── */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
+      <div className="flex items-center justify-between">
         <div>
-          <h1
-            style={{
-              fontSize: "24px",
-              fontWeight: 700,
-              color: "#0f172a",
-              margin: 0,
-            }}
-          >
+          <span className="text-[10.5px] font-medium uppercase tracking-[0.18em] text-stamp font-mono">
+            Warehouse Ledger
+          </span>
+          <h1 className="mt-1.5 font-display text-2xl font-semibold tracking-tight text-ink">
             Medicine Central Inventory
           </h1>
-          <p
-            style={{
-              fontSize: "14px",
-              color: "#64748b",
-              marginTop: "4px",
-              marginBottom: 0,
-            }}
-          >
+          <p className="mt-1 text-[13.5px] text-ink/55">
             Monitor real-time item stocks, verify batch tracking parameters, and
             identify critical expiry statuses.
           </p>
         </div>
-        <button
-          style={{
-            padding: "10px 16px",
-            borderRadius: "8px",
-            backgroundColor: "#059669",
-            color: "#fff",
-            fontSize: "14px",
-            fontWeight: 600,
-            border: "none",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            cursor: "pointer",
-          }}
-        >
+        <button className="flex items-center gap-2 rounded-none bg-ink px-4 py-2.5 text-[13.5px] font-semibold text-paper transition-colors hover:bg-teal-deep focus:outline-none focus:ring-2 focus:ring-teal-mid/30">
           <Plus size={16} /> Add New Medication
         </button>
       </div>
 
       {/* ── High-Level Analytics Row ── */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-          gap: "16px",
-        }}
-      >
-        <div
-          style={{
-            backgroundColor: "#ffffff",
-            border: "1px solid #e2e8f0",
-            borderRadius: "10px",
-            padding: "16px",
-            display: "flex",
-            alignItems: "center",
-            gap: "14px",
-          }}
-        >
-          <div
-            style={{
-              width: "40px",
-              height: "40px",
-              borderRadius: "8px",
-              backgroundColor: "#f1f5f9",
-              color: "#475569",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="flex items-center gap-3.5 border border-line bg-white p-4">
+          <div className="flex h-10 w-10 items-center justify-center bg-paper-dim text-ink/60">
             <Layers size={20} />
           </div>
           <div>
-            <div
-              style={{ fontSize: "12px", color: "#64748b", fontWeight: 500 }}
-            >
+            <div className="text-[11px] font-semibold uppercase tracking-[0.06em] text-ink/50 font-mono">
               Total Tracked SKUs
             </div>
-            <div
-              style={{ fontSize: "20px", fontWeight: 700, color: "#0f172a" }}
-            >
+            <div className="font-display text-xl font-bold text-ink">
               {totalItems} Items
             </div>
           </div>
         </div>
 
-        <div
-          style={{
-            backgroundColor: "#ffffff",
-            border: "1px solid #e2e8f0",
-            borderRadius: "10px",
-            padding: "16px",
-            display: "flex",
-            alignItems: "center",
-            gap: "14px",
-          }}
-        >
-          <div
-            style={{
-              width: "40px",
-              height: "40px",
-              borderRadius: "8px",
-              backgroundColor: "#e0fdf4",
-              color: "#16a34a",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
+        <div className="flex items-center gap-3.5 border border-line bg-white p-4">
+          <div className="flex h-10 w-10 items-center justify-center bg-teal-mid/10 text-teal-mid">
             <CheckCircle size={20} />
           </div>
           <div>
-            <div
-              style={{ fontSize: "12px", color: "#64748b", fontWeight: 500 }}
-            >
+            <div className="text-[11px] font-semibold uppercase tracking-[0.06em] text-ink/50 font-mono">
               Sufficient Stock
             </div>
-            <div
-              style={{ fontSize: "20px", fontWeight: 700, color: "#16a34a" }}
-            >
+            <div className="font-display text-xl font-bold text-teal-mid">
               {healthyCount} Elements
             </div>
           </div>
         </div>
 
-        <div
-          style={{
-            backgroundColor: "#ffffff",
-            border: "1px solid #e2e8f0",
-            borderRadius: "10px",
-            padding: "16px",
-            display: "flex",
-            alignItems: "center",
-            gap: "14px",
-          }}
-        >
-          <div
-            style={{
-              width: "40px",
-              height: "40px",
-              borderRadius: "8px",
-              backgroundColor: "#fff7ed",
-              color: "#ea580c",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
+        <div className="flex items-center gap-3.5 border border-line bg-white p-4">
+          <div className="flex h-10 w-10 items-center justify-center bg-stamp-dim text-stamp">
             <AlertTriangle size={20} />
           </div>
           <div>
-            <div
-              style={{ fontSize: "12px", color: "#64748b", fontWeight: 500 }}
-            >
+            <div className="text-[11px] font-semibold uppercase tracking-[0.06em] text-ink/50 font-mono">
               Reorder Thresholds Hit
             </div>
-            <div
-              style={{ fontSize: "20px", fontWeight: 700, color: "#ea580c" }}
-            >
+            <div className="font-display text-xl font-bold text-stamp">
               {lowStockCount} SKUs
             </div>
           </div>
         </div>
 
-        <div
-          style={{
-            backgroundColor: "#ffffff",
-            border: "1px solid #e2e8f0",
-            borderRadius: "10px",
-            padding: "16px",
-            display: "flex",
-            alignItems: "center",
-            gap: "14px",
-          }}
-        >
-          <div
-            style={{
-              width: "40px",
-              height: "40px",
-              borderRadius: "8px",
-              backgroundColor: "#fef2f2",
-              color: "#dc2626",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
+        <div className="flex items-center gap-3.5 border border-line bg-white p-4">
+          <div className="flex h-10 w-10 items-center justify-center bg-danger-bg text-danger">
             <Package size={20} />
           </div>
           <div>
-            <div
-              style={{ fontSize: "12px", color: "#64748b", fontWeight: 500 }}
-            >
+            <div className="text-[11px] font-semibold uppercase tracking-[0.06em] text-ink/50 font-mono">
               Depleted Stock
             </div>
-            <div
-              style={{ fontSize: "20px", fontWeight: 700, color: "#dc2626" }}
-            >
+            <div className="font-display text-xl font-bold text-danger">
               {outOfStockCount} SKUs
             </div>
           </div>
@@ -344,62 +208,29 @@ export default function MedicineInventory() {
       </div>
 
       {/* ── Filters & Options Action Bar ── */}
-      <div
-        style={{
-          display: "flex",
-          gap: "12px",
-          backgroundColor: "#ffffff",
-          border: "1px solid #e2e8f0",
-          borderRadius: "10px",
-          padding: "12px",
-          alignItems: "center",
-        }}
-      >
+      <div className="flex items-center gap-3 border border-line bg-white p-3">
         {/* Search Field */}
-        <div style={{ position: "relative", flex: 1 }}>
+        <div className="relative flex-1">
           <Search
             size={16}
-            style={{
-              position: "absolute",
-              left: "12px",
-              top: "50%",
-              transform: "translateY(-50%)",
-              color: "#94a3b8",
-            }}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/40"
           />
           <input
             type="text"
             placeholder="Search by name, item ID, or manufacturing batch number..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "8px 12px 8px 36px",
-              borderRadius: "6px",
-              border: "1px solid #cbd5e1",
-              fontSize: "13.5px",
-              outline: "none",
-              fontFamily: "inherit",
-            }}
+            className={`${inputBase} pl-9`}
           />
         </div>
 
         {/* Category Dropdown */}
-        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-          <Filter size={15} color="#64748b" />
+        <div className="flex items-center gap-1.5">
+          <Filter size={15} className="text-ink/50" />
           <select
             value={selectedCategory}
             onChange={e => setSelectedCategory(e.target.value)}
-            style={{
-              padding: "8px 12px",
-              borderRadius: "6px",
-              border: "1px solid #cbd5e1",
-              backgroundColor: "#fff",
-              fontSize: "13.5px",
-              color: "#475569",
-              outline: "none",
-              cursor: "pointer",
-            }}
+            className={`${inputBase} cursor-pointer`}
           >
             <option value="All">All Categories</option>
             <option value="Analgesic">Analgesic</option>
@@ -411,270 +242,121 @@ export default function MedicineInventory() {
         </div>
 
         {/* Export Data Button */}
-        <button
-          style={{
-            padding: "8px 14px",
-            borderRadius: "6px",
-            border: "1px solid #cbd5e1",
-            backgroundColor: "#fff",
-            fontSize: "13.5px",
-            fontWeight: 500,
-            color: "#475569",
-            display: "flex",
-            alignItems: "center",
-            gap: "6px",
-            cursor: "pointer",
-          }}
-        >
+        <button className="flex cursor-pointer items-center gap-1.5 rounded-none border border-line bg-white px-3.5 py-2 text-[13.5px] font-medium text-ink/70 transition-colors hover:bg-paper-dim">
           <Download size={14} /> Export CSV
         </button>
       </div>
 
       {/* ── Main Inventory Ledger Table ── */}
-      <div
-        style={{
-          backgroundColor: "#ffffff",
-          border: "1px solid #e2e8f0",
-          borderRadius: "12px",
-          overflow: "hidden",
-        }}
-      >
-        <div style={{ overflowX: "auto" }}>
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              textAlign: "left",
-              fontSize: "13.5px",
-            }}
-          >
+      <div className="overflow-hidden border border-line bg-white">
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse text-left text-[13.5px]">
             <thead>
-              <tr
-                style={{
-                  backgroundColor: "#f8fafc",
-                  borderBottom: "1px solid #e2e8f0",
-                }}
-              >
-                <th
-                  style={{
-                    padding: "14px 16px",
-                    color: "#475569",
-                    fontWeight: 600,
-                  }}
-                >
+              <tr className="border-b border-line bg-paper-dim">
+                <th className="px-4 py-3.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/55">
                   Medicine Details
                 </th>
-                <th
-                  style={{
-                    padding: "14px 16px",
-                    color: "#475569",
-                    fontWeight: 600,
-                  }}
-                >
+                <th className="px-4 py-3.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/55">
                   Batch Code
                 </th>
-                <th
-                  style={{
-                    padding: "14px 16px",
-                    color: "#475569",
-                    fontWeight: 600,
-                  }}
-                >
+                <th className="px-4 py-3.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/55">
                   Storage Location
                 </th>
-                <th
-                  style={{
-                    padding: "14px 16px",
-                    color: "#475569",
-                    fontWeight: 600,
-                  }}
-                >
+                <th className="px-4 py-3.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/55">
                   Stock Balance
                 </th>
-                <th
-                  style={{
-                    padding: "14px 16px",
-                    color: "#475569",
-                    fontWeight: 600,
-                  }}
-                >
+                <th className="px-4 py-3.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/55">
                   Expiry Timeline
                 </th>
-                <th
-                  style={{
-                    padding: "14px 16px",
-                    color: "#475569",
-                    fontWeight: 600,
-                    textAlign: "right",
-                  }}
-                >
+                <th className="px-4 py-3.5 text-right font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/55">
                   Price / Strip
                 </th>
-                <th
-                  style={{
-                    padding: "14px 16px",
-                    color: "#475569",
-                    fontWeight: 600,
-                    textAlign: "center",
-                  }}
-                >
+                <th className="px-4 py-3.5 text-center font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/55">
                   Status
                 </th>
               </tr>
             </thead>
             <tbody>
-              {filteredInventory.map(item => {
-                // Determine layout badges based on safety states
-                const statusStyles =
-                  item.status === "Healthy"
-                    ? { bg: "#dcfce7", text: "#15803d" }
-                    : item.status === "Low Stock"
-                      ? { bg: "#fef3c7", text: "#b45309" }
-                      : { bg: "#fee2e2", text: "#b91c1c" };
+              {filteredInventory.map(item => (
+                <tr
+                  key={item.id}
+                  className="border-b border-line/60 transition-colors hover:bg-paper/70"
+                >
+                  {/* Name and Internal Meta Tags */}
+                  <td className="px-4 py-3.5">
+                    <div className="font-semibold text-ink">{item.name}</div>
+                    <div className="mt-0.5 flex gap-2 text-[11px] text-ink/40">
+                      <span>ID: {item.id}</span>
+                      <span>•</span>
+                      <span>{item.category}</span>
+                    </div>
+                  </td>
 
-                return (
-                  <tr
-                    key={item.id}
-                    style={{ borderBottom: "1px solid #f1f5f9" }}
-                    onMouseEnter={e =>
-                      (e.currentTarget.style.backgroundColor = "#f8fafc")
-                    }
-                    onMouseLeave={e =>
-                      (e.currentTarget.style.backgroundColor = "transparent")
-                    }
-                  >
-                    {/* Name and Internal Meta Tags */}
-                    <td style={{ padding: "14px 16px" }}>
-                      <div style={{ fontWeight: 600, color: "#0f172a" }}>
-                        {item.name}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: "11px",
-                          color: "#94a3b8",
-                          display: "flex",
-                          gap: "8px",
-                          marginTop: "2px",
-                        }}
-                      >
-                        <span>ID: {item.id}</span>
-                        <span>•</span>
-                        <span>{item.category}</span>
-                      </div>
-                    </td>
+                  {/* Batch Number Code */}
+                  <td className="px-4 py-3.5 font-mono text-[13px] font-medium text-ink/70">
+                    {item.batchNo}
+                  </td>
 
-                    {/* Batch Number Code */}
-                    <td
-                      style={{
-                        padding: "14px 16px",
-                        color: "#334155",
-                        fontFamily: "monospace",
-                        fontWeight: 500,
-                      }}
+                  {/* Shelf/Rack Address */}
+                  <td className="px-4 py-3.5 text-ink/60">
+                    <span className="rounded-none bg-paper-dim px-2 py-1 text-[12px] font-semibold text-ink/60 font-mono">
+                      Rack {item.rack}
+                    </span>
+                  </td>
+
+                  {/* Current Quantities vs Alert Margin thresholds */}
+                  <td className="px-4 py-3.5">
+                    <div
+                      className={`font-semibold ${
+                        item.stockStrips <= item.minLevel
+                          ? "text-stamp"
+                          : "text-ink"
+                      }`}
                     >
-                      {item.batchNo}
-                    </td>
+                      {item.stockStrips} Strips
+                    </div>
+                    <div className="text-[11px] text-ink/40">
+                      Min Alert Level: {item.minLevel}
+                    </div>
+                  </td>
 
-                    {/* Shelf/Rack Address */}
-                    <td style={{ padding: "14px 16px", color: "#475569" }}>
-                      <span
-                        style={{
-                          fontSize: "12px",
-                          backgroundColor: "#f1f5f9",
-                          padding: "3px 8px",
-                          borderRadius: "4px",
-                          fontWeight: 600,
-                          color: "#64748b",
-                        }}
-                      >
-                        Rack {item.rack}
-                      </span>
-                    </td>
+                  {/* Expiration Timeline Flag */}
+                  <td className="px-4 py-3.5 font-medium text-ink/70">
+                    <div className="flex items-center gap-1">
+                      <Calendar size={13} className="text-ink/40" /> {item.expiry}
+                    </div>
+                  </td>
 
-                    {/* Current Quantities vs Alert Margin thresholds */}
-                    <td style={{ padding: "14px 16px" }}>
-                      <div
-                        style={{
-                          fontWeight: 600,
-                          color:
-                            item.stockStrips <= item.minLevel
-                              ? "#ca8a04"
-                              : "#0f172a",
-                        }}
-                      >
-                        {item.stockStrips} Strips
-                      </div>
-                      <div style={{ fontSize: "11px", color: "#94a3b8" }}>
-                        Min Alert Level: {item.minLevel}
-                      </div>
-                    </td>
+                  {/* Base Pricing Matrix */}
+                  <td className="px-4 py-3.5 text-right font-mono font-bold text-ink">
+                    ₹{item.price.toFixed(2)}
+                  </td>
 
-                    {/* Expiration Timeline Flag */}
-                    <td
-                      style={{
-                        padding: "14px 16px",
-                        color: "#334155",
-                        fontWeight: 500,
-                      }}
+                  {/* Status Badge */}
+                  <td className="px-4 py-3.5 text-center">
+                    <span
+                      className={`inline-block px-2.5 py-1 text-[11.5px] font-semibold ${
+                        statusBadge[item.status] ||
+                        "border border-line bg-paper-dim text-ink/60"
+                      }`}
                     >
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "4px",
-                        }}
-                      >
-                        <Calendar size={13} color="#94a3b8" /> {item.expiry}
-                      </div>
-                    </td>
-
-                    {/* Base Pricing Matrix */}
-                    <td
-                      style={{
-                        padding: "14px 16px",
-                        textAlign: "right",
-                        fontWeight: 700,
-                        color: "#0f172a",
-                      }}
-                    >
-                      ₹{item.price.toFixed(2)}
-                    </td>
-
-                    {/* Status Badge */}
-                    <td style={{ padding: "14px 16px", textAlign: "center" }}>
-                      <span
-                        style={{
-                          display: "inline-block",
-                          padding: "4px 10px",
-                          borderRadius: "20px",
-                          fontSize: "12px",
-                          fontWeight: 600,
-                          backgroundColor: statusStyles.bg,
-                          color: statusStyles.text,
-                        }}
-                      >
-                        {item.status}
-                      </span>
-                    </td>
-                  </tr>
-                );
-              })}
+                      {item.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
 
               {filteredInventory.length === 0 && (
                 <tr>
                   <td
                     colSpan={7}
-                    style={{
-                      padding: "48px",
-                      textAlign: "center",
-                      color: "#94a3b8",
-                    }}
+                    className="px-12 py-12 text-center text-ink/40"
                   >
                     <Package
                       size={32}
-                      style={{ margin: "0 auto 12px", opacity: 0.4 }}
+                      className="mx-auto mb-3 opacity-40"
                     />
-                    <div style={{ fontSize: "14px" }}>
+                    <div className="text-[14px]">
                       No medications found matching your current filter filters.
                     </div>
                   </td>
