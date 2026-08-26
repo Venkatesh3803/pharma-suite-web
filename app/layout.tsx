@@ -1,4 +1,5 @@
 import { TooltipProvider } from "@/components/ui/tooltip";
+import ReduxProvider from "@/components/providers/redux-provider";
 import "./globals.css";
 
 export const metadata = {
@@ -14,7 +15,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased bg-paper text-ink">
-        <TooltipProvider delayDuration={0}>{children}</TooltipProvider>
+        <ReduxProvider>
+          <TooltipProvider delayDuration={0}>{children}</TooltipProvider>
+        </ReduxProvider>
       </body>
     </html>
   );

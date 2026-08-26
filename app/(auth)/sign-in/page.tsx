@@ -1,9 +1,22 @@
 "use client";
 
-import React, { useState } from "react";
-import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import React, { Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { authApi, setAccessToken } from "@/lib/api";
+import { useAppDispatch } from "@/lib/redux/hooks";
+import { setSession } from "@/lib/redux/slices/authSlice";
+import { fetchWorkspace } from "@/lib/redux/slices/workspaceSlice";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
 
 import { Space_Grotesk, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import {
@@ -47,38 +60,45 @@ const THEME = {
   ["--danger-bg" as string]: "#FBEDE9",
 } as React.CSSProperties;
 
-export default function SignInPage() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+const signInSchema = z.object({
+  username: z.string().trim().min(1, "Enter your email.").email("Enter a valid email."),
+  password: z.string().min(6, "Password must be at least 6 characters."),
+});
+
+type SignInFormValues = z.infer<typeof signInSchema>;
+
+function SignInContent() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const resetSuccess = searchParams.get("reset") === "success";
+  const dispatch = useAppDispatch();
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const form = useForm<SignInFormValues>({
+    resolver: zodResolver(signInSchema),
+    defaultValues: { username: "", password: "" },
+  });
+
+  const handleLogin = async (values: SignInFormValues) => {
     setError("");
     setLoading(true);
 
     try {
-      const res = await signIn("credentials", {
-        username,
-        password,
-        redirect: false,
-      });
+      const data = await authApi.login(values.username.trim(), values.password);
 
-      if (res?.error) {
-        setError(
-          "We couldn't verify those credentials. Check your email and password and try again.",
-        );
-        setLoading(false);
-      } else {
-        router.push("/dashboard/purchase-dashboard");
-        router.refresh();
-      }
+      setAccessToken(data.accessToken);
+      dispatch(setSession(data));
+      void dispatch(fetchWorkspace());
+      router.push("/dashboard/purchase-dashboard");
+      router.refresh();
     } catch (err) {
       setError(
-        "Couldn't reach the server. Check your connection and try again.",
+        err instanceof Error
+          ? err.message
+          : "We couldn't verify those credentials. Check your email and password and try again.",
       );
+    } finally {
       setLoading(false);
     }
   };
@@ -227,8 +247,18 @@ export default function SignInPage() {
             Sign in to your workspace
           </h2>
           <p className="text-[13.5px] text-[var(--ink)]/55 mt-1.5 leading-relaxed">
-            Enter your credentials to open today's ledger.
+            Enter your credentials to open today&apos;s ledger.
           </p>
+
+          {resetSuccess && (
+            <div className="flex items-start gap-2.5 bg-[var(--teal-deep)]/10 border border-[var(--teal-mid)]/30 text-[var(--teal-deep)] text-[12.5px] leading-relaxed p-3.5 mt-6">
+              <ShieldCheck size={15} className="mt-0.5 shrink-0" />
+              <span>
+                Your password was reset successfully. Sign in with your new
+                password to continue.
+              </span>
+            </div>
+          )}
 
           {error && (
             <div className="flex items-start gap-2.5 bg-[var(--danger-bg)] border border-[var(--danger)]/25 text-[var(--danger)] text-[12.5px] leading-relaxed p-3.5 mt-6">
@@ -237,67 +267,83 @@ export default function SignInPage() {
             </div>
           )}
 
-          <form onSubmit={handleLogin} className="flex flex-col gap-5 mt-7">
-            <div>
-              <label className={label}>Email</label>
-              <div className="relative">
-                <Mail
-                  size={15}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--ink)]/35"
-                />
-                <input
-                  type="email"
-                  required
-                  value={username}
-                  onChange={e => setUsername(e.target.value)}
-                  placeholder="operator@pharmasuite.core"
-                  className={inputBase}
-                />
-              </div>
-            </div>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleLogin)} className="flex flex-col gap-5 mt-7">
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <label className={label}>Email</label>
+                    <div className="relative">
+                      <Mail
+                        size={15}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--ink)]/35"
+                      />
+                      <FormControl>
+                        <input
+                          type="email"
+                          {...field}
+                          placeholder="operator@pharmasuite.core"
+                          className={inputBase}
+                        />
+                      </FormControl>
+                    </div>
+                    <FormMessage className="text-[12px]" />
+                  </FormItem>
+                )}
+              />
 
-            <div>
-              <div className="flex justify-between items-center mb-1.5">
-                <label className="text-[11px] font-medium text-[var(--ink)]/70 [font-family:var(--font-mono)] uppercase tracking-[0.06em]">
-                  Password
-                </label>
-                <a
-                  href="#"
-                  className="text-[11.5px] text-[var(--teal-deep)] hover:text-[var(--stamp)] font-medium transition-colors [font-family:var(--font-mono)]"
-                >
-                  Forgot password?
-                </a>
-              </div>
-              <div className="relative">
-                <KeyRound
-                  size={15}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--ink)]/35"
-                />
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className={inputBase}
-                />
-              </div>
-            </div>
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex justify-between items-center mb-1.5">
+                      <label className="text-[11px] font-medium text-[var(--ink)]/70 [font-family:var(--font-mono)] uppercase tracking-[0.06em]">
+                        Password
+                      </label>
+                      <Link
+                        href="/forgot-password"
+                        className="text-[11.5px] text-[var(--teal-deep)] hover:text-[var(--stamp)] font-medium transition-colors [font-family:var(--font-mono)]"
+                      >
+                        Forgot password?
+                      </Link>
+                    </div>
+                    <div className="relative">
+                      <KeyRound
+                        size={15}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--ink)]/35"
+                      />
+                      <FormControl>
+                        <input
+                          type="password"
+                          {...field}
+                          placeholder="••••••••"
+                          className={inputBase}
+                        />
+                      </FormControl>
+                    </div>
+                    <FormMessage className="text-[12px]" />
+                  </FormItem>
+                )}
+              />
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full mt-2 py-3 bg-[var(--ink)] text-[var(--paper)] text-[13.5px] font-medium hover:bg-[var(--teal-deep)] focus:outline-none focus:ring-2 focus:ring-[var(--teal-mid)]/30 flex items-center justify-center gap-3 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? (
-                <Loader2 size={16} className="animate-spin" />
-              ) : (
-                <>
-                  Sign in <ArrowRight size={16} />
-                </>
-              )}
-            </button>
-          </form>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full mt-2 py-3 bg-[var(--ink)] text-[var(--paper)] text-[13.5px] font-medium hover:bg-[var(--teal-deep)] focus:outline-none focus:ring-2 focus:ring-[var(--teal-mid)]/30 flex items-center justify-center gap-3 transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <>
+                    Sign in <ArrowRight size={16} />
+                  </>
+                )}
+              </button>
+            </form>
+          </Form>
 
           <div className="text-center mt-8 pt-6 border-t border-[var(--line)] text-[13px] text-[var(--ink)]/55">
             New to PharmaSuite?{" "}
@@ -311,5 +357,13 @@ export default function SignInPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignInContent />
+    </Suspense>
   );
 }
