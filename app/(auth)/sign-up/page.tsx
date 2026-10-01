@@ -18,7 +18,7 @@ import {
 import { Space_Grotesk, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import { ShieldCheck, Loader2, Building2, Smartphone, FileText, MapPin, Briefcase, ChevronDown, AlertTriangle } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { authApi, setAccessToken } from "@/lib/api";
+import { authApi, clearAccessToken } from "@/lib/api";
 import { useAppDispatch } from "@/lib/redux/hooks";
 import { setSession } from "@/lib/redux/slices/authSlice";
 import { fetchWorkspace } from "@/lib/redux/slices/workspaceSlice";
@@ -142,7 +142,7 @@ export default function SignUpPage() {
                 // address: `${values.state}, India`
             });
 
-            setAccessToken(data.accessToken);
+            clearAccessToken();
             dispatch(setSession(data));
             void dispatch(fetchWorkspace());
             router.push("/onboarding");

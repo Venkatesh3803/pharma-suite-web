@@ -3,18 +3,26 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Space_Grotesk, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
-import { Building2, MapPin, Users, ArrowLeft, ArrowRight, Check, Pill, Loader2, AlertTriangle, CreditCard, Wallet, QrCode, X, CheckCircle2 } from "lucide-react";
+import {
+    Building2,
+    MapPin,
+    Users,
+    ArrowLeft,
+    ArrowRight,
+    Check,
+    Pill,
+    Loader2,
+    AlertTriangle,
+    CreditCard,
+    Wallet,
+    QrCode,
+    X,
+    CheckCircle2
+} from "lucide-react";
 import { useForm, type FieldPath } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useAppDispatch } from "@/lib/redux/hooks";
 import { updateWorkspace } from "@/lib/redux/slices/workspaceSlice";
 import { selectPlan as dispatchSelectPlan } from "@/lib/redux/slices/subscriptionSlice";
@@ -174,25 +182,13 @@ const onboardingSchema = z.object({
 
     // STEP 3: SCALE
     expectedUsers: z.string(),
-    outletsCount: z.string().refine(
-        v => v === "" || (Number.isInteger(Number(v)) && Number(v) >= 1),
-        "Must be a whole number of 1 or more."
-    ),
-    warehousesCount: z.string().refine(
-        v => v === "" || (Number.isInteger(Number(v)) && Number(v) >= 0),
-        "Must be a whole number of 0 or more."
-    ),
-    checkoutCountersCount: z.string().refine(
-        v => v === "" || (Number.isInteger(Number(v)) && Number(v) >= 1),
-        "Must be a whole number of 1 or more."
-    ),
+    outletsCount: z.string().refine(v => v === "" || (Number.isInteger(Number(v)) && Number(v) >= 1), "Must be a whole number of 1 or more."),
+    warehousesCount: z.string().refine(v => v === "" || (Number.isInteger(Number(v)) && Number(v) >= 0), "Must be a whole number of 0 or more."),
+    checkoutCountersCount: z.string().refine(v => v === "" || (Number.isInteger(Number(v)) && Number(v) >= 1), "Must be a whole number of 1 or more."),
     monthlyOrdersEstimate: z.string(),
 
     currency: z.string(),
-    lowStockThreshold: z.string().refine(
-        v => v === "" || (Number.isInteger(Number(v)) && Number(v) >= 0),
-        "Must be a whole number of 0 or more."
-    ),
+    lowStockThreshold: z.string().refine(v => v === "" || (Number.isInteger(Number(v)) && Number(v) >= 0), "Must be a whole number of 0 or more."),
     allowNegativeStock: z.boolean()
 });
 
@@ -283,11 +279,7 @@ export default function OnboardingPage() {
             setOnboardedCookie();
             router.push("/dashboard/purchase-dashboard");
         } catch (err) {
-            setError(
-                typeof err === "string"
-                    ? err
-                    : "Couldn't save your workspace setup. Please try again."
-            );
+            setError(typeof err === "string" ? err : "Couldn't save your workspace setup. Please try again.");
         } finally {
             setSaving(false);
         }
@@ -325,9 +317,7 @@ export default function OnboardingPage() {
 
     const buildUpdateInput = (values: OnboardingFormValues): UpdateWorkspaceInput => {
         const addr = values.address;
-        const address = [addr.street, addr.area, addr.city, addr.district, addr.state, addr.zipCode, addr.country]
-            .filter(Boolean)
-            .join(", ");
+        const address = [addr.street, addr.area, addr.city, addr.district, addr.state, addr.zipCode, addr.country].filter(Boolean).join(", ");
 
         return {
             name: values.businessName.trim() || undefined,
@@ -365,605 +355,571 @@ export default function OnboardingPage() {
             style={THEME}
         >
             <Form {...form}>
-            <form onSubmit={form.handleSubmit(submitAll)} className="flex w-full">
-                {/* SIDEBAR */}
-                <div className="hidden lg:flex lg:w-[340px] relative flex-col justify-between px-10 py-12 bg-[var(--teal-deep)] overflow-hidden shrink-0">
-                    <div
-                        className="pointer-events-none absolute inset-0 opacity-[0.05]"
-                        style={{
-                            backgroundImage: "radial-gradient(#ffffff 1px, transparent 1.4px)",
-                            backgroundSize: "22px 22px"
-                        }}
-                    />
+                <form onSubmit={form.handleSubmit(submitAll)} className="flex w-full">
+                    {/* SIDEBAR */}
+                    <div className="hidden lg:flex lg:w-[340px] relative flex-col justify-between px-10 py-12 bg-[var(--teal-deep)] overflow-hidden shrink-0">
+                        <div
+                            className="pointer-events-none absolute inset-0 opacity-[0.05]"
+                            style={{
+                                backgroundImage: "radial-gradient(#ffffff 1px, transparent 1.4px)",
+                                backgroundSize: "22px 22px"
+                            }}
+                        />
 
-                    <div className="relative z-10">
-                        <div className="flex items-center gap-2.5">
-                            <div className="w-8 h-8 border border-[var(--stamp)] flex items-center justify-center text-[var(--stamp)] font-semibold text-xs">
-                                PS
+                        <div className="relative z-10">
+                            <div className="flex items-center gap-2.5">
+                                <div className="w-8 h-8 border border-[var(--stamp)] flex items-center justify-center text-[var(--stamp)] font-semibold text-xs">
+                                    PS
+                                </div>
+                                <span className="text-[15px] font-semibold text-[var(--paper)] tracking-tight [font-family:var(--font-display)]">
+                                    PharmaSuite OS
+                                </span>
                             </div>
-                            <span className="text-[15px] font-semibold text-[var(--paper)] tracking-tight [font-family:var(--font-display)]">
-                                PharmaSuite OS
-                            </span>
-                        </div>
 
-                        <span className={`${eyebrow} block mt-9`}>Workspace Provisioning</span>
-                        <p className="text-[13px] text-[var(--paper)]/60 leading-relaxed mt-3">
-                            Tailoring pharmacy ERP modules, drug-license requirements, and checkout POS flow for your business model.
-                        </p>
+                            <span className={`${eyebrow} block mt-9`}>Workspace Provisioning</span>
+                            <p className="text-[13px] text-[var(--paper)]/60 leading-relaxed mt-3">
+                                Tailoring pharmacy ERP modules, drug-license requirements, and checkout POS flow for your business model.
+                            </p>
 
-                        <div className="mt-10 space-y-1">
-                            {STEPS.map(item => {
-                                const Icon = item.icon;
-                                const active = item.id === step;
-                                const completed = item.id < step;
+                            <div className="mt-10 space-y-1">
+                                {STEPS.map(item => {
+                                    const Icon = item.icon;
+                                    const active = item.id === step;
+                                    const completed = item.id < step;
 
-                                return (
-                                    <div
-                                        key={item.id}
-                                        className={`flex items-center gap-4 py-3 px-1 border-b transition-all duration-200 ${
-                                            active ? "border-[var(--stamp)]/40" : "border-[var(--line-dark)]"
-                                        }`}
-                                    >
-                                        <span
-                                            className={`text-[11px] w-5 [font-family:var(--font-mono)] ${
-                                                active ? "text-[var(--stamp)]" : completed ? "text-[var(--paper)]/50" : "text-[var(--paper)]/25"
-                                            }`}
-                                        >
-                                            {String(item.id).padStart(2, "0")}
-                                        </span>
-
+                                    return (
                                         <div
-                                            className={`w-8 h-8 flex items-center justify-center border transition-all shrink-0 ${
-                                                completed
-                                                    ? "border-[var(--stamp)]/50 text-[var(--stamp)] bg-[var(--stamp-dim)]"
-                                                    : active
-                                                      ? "border-[var(--stamp)] text-[var(--stamp)]"
-                                                      : "border-[var(--line-dark)] text-[var(--paper)]/30"
+                                            key={item.id}
+                                            className={`flex items-center gap-4 py-3 px-1 border-b transition-all duration-200 ${
+                                                active ? "border-[var(--stamp)]/40" : "border-[var(--line-dark)]"
                                             }`}
                                         >
-                                            {completed ? <Check size={14} strokeWidth={2.5} /> : <Icon size={14} />}
-                                        </div>
+                                            <span
+                                                className={`text-[11px] w-5 [font-family:var(--font-mono)] ${
+                                                    active ? "text-[var(--stamp)]" : completed ? "text-[var(--paper)]/50" : "text-[var(--paper)]/25"
+                                                }`}
+                                            >
+                                                {String(item.id).padStart(2, "0")}
+                                            </span>
 
-                                        <span className={`text-[13px] font-medium ${active ? "text-[var(--paper)]" : "text-[var(--paper)]/50"}`}>
-                                            {item.title}
-                                        </span>
-                                    </div>
-                                );
-                            })}
+                                            <div
+                                                className={`w-8 h-8 flex items-center justify-center border transition-all shrink-0 ${
+                                                    completed
+                                                        ? "border-[var(--stamp)]/50 text-[var(--stamp)] bg-[var(--stamp-dim)]"
+                                                        : active
+                                                          ? "border-[var(--stamp)] text-[var(--stamp)]"
+                                                          : "border-[var(--line-dark)] text-[var(--paper)]/30"
+                                                }`}
+                                            >
+                                                {completed ? <Check size={14} strokeWidth={2.5} /> : <Icon size={14} />}
+                                            </div>
+
+                                            <span className={`text-[13px] font-medium ${active ? "text-[var(--paper)]" : "text-[var(--paper)]/50"}`}>
+                                                {item.title}
+                                            </span>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        <div className="relative z-10 text-[11px] text-[var(--paper)]/40 [font-family:var(--font-mono)] tracking-wide border-t border-[var(--line-dark)] pt-5">
+                            PHARMA · DRUG CONTROL ENGINE
                         </div>
                     </div>
 
-                    <div className="relative z-10 text-[11px] text-[var(--paper)]/40 [font-family:var(--font-mono)] tracking-wide border-t border-[var(--line-dark)] pt-5">
-                        PHARMA · DRUG CONTROL ENGINE
-                    </div>
-                </div>
-
-                {/* CONTENT */}
-                <div className="flex-1 flex flex-col justify-center py-12 px-6 md:px-12 max-w-4xl mx-auto w-full">
-                    <div className="bg-white border border-[var(--line)] p-8 md:p-10 flex flex-col justify-between min-h-[600px]">
-                        <div>
-                            {/* STEP 1: INDUSTRY & ENTITY */}
-                            {step === 1 && (
-                                <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-200">
-                                    <div>
-                                        <span className={eyebrow}>Step 01 · Business Archetype</span>
-                                        <h2 className="text-[24px] font-semibold text-[var(--ink)] tracking-tight mt-1.5 [font-family:var(--font-display)]">
-                                            Pharmaceutical operations domain
-                                        </h2>
-                                        <p className="text-[13.5px] text-[var(--ink)]/55 mt-1 leading-relaxed">
-                                            Drug-control workflows are pre-configured: batch tracking, drug licenses, CDSCO/FDA logs, and Rx rules.
-                                        </p>
-                                    </div>
-
-                                    {/* DOMAIN CONFIRMATION */}
-                                    <div className="p-4 border border-[var(--stamp)] bg-[var(--stamp-dim)] text-left flex flex-col justify-between transition-all select-none">
-                                        <div className="flex items-center justify-between mb-3">
-                                            <Pill size={18} className="text-[var(--stamp)]" />
-                                            <div className="w-4 h-4 bg-[var(--stamp)] border border-[var(--stamp)] flex items-center justify-center text-white">
-                                                <Check size={10} strokeWidth={3} />
-                                            </div>
-                                        </div>
+                    {/* CONTENT */}
+                    <div className="flex-1 flex flex-col justify-center py-12 px-6 md:px-12 max-w-4xl mx-auto w-full">
+                        <div className="bg-white border border-[var(--line)] p-8 md:p-10 flex flex-col justify-between min-h-[600px]">
+                            <div>
+                                {/* STEP 1: INDUSTRY & ENTITY */}
+                                {step === 1 && (
+                                    <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-200">
                                         <div>
-                                            <div className="text-[13.5px] font-semibold text-[var(--ink)]">Pharmaceuticals</div>
-                                            <div className="text-[11.5px] text-[var(--ink)]/50 mt-1 leading-normal">
-                                                Batch tracking, Drug Licenses, CDSCO/FDA logs, Rx rules.
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                                        <div className="md:col-span-2">
-                                            <FormField
-                                                control={form.control}
-                                                name="businessName"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel className={label}>Business / Legal entity name *</FormLabel>
-                                                        <FormControl>
-                                                            <input
-                                                                type="text"
-                                                                {...field}
-                                                                placeholder="e.g. Apex Healthcare & Retail LLP"
-                                                                className={inputBase}
-                                                            />
-                                                        </FormControl>
-                                                        <FormMessage className="text-[12px]" />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <FormField
-                                                control={form.control}
-                                                name="gstinOrTaxId"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel className={label}>GSTIN / Tax Registration</FormLabel>
-                                                        <FormControl>
-                                                            <input
-                                                                type="text"
-                                                                {...field}
-                                                                placeholder="15-CHAR ALPHANUMERIC"
-                                                                className={inputBaseMono}
-                                                            />
-                                                        </FormControl>
-                                                        <FormMessage className="text-[12px]" />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <FormField
-                                                control={form.control}
-                                                name="panNumber"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel className={label}>PAN Number</FormLabel>
-                                                        <FormControl>
-                                                            <input
-                                                                type="text"
-                                                                {...field}
-                                                                placeholder="ABCDE1234F"
-                                                                className={inputBaseMono}
-                                                            />
-                                                        </FormControl>
-                                                        <FormMessage className="text-[12px]" />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </div>
-
-                                        {/* DYNAMIC REGULATORY FIELDS */}
-                                        <div>
-                                            <FormField
-                                                control={form.control}
-                                                name="drugLicenseNumber"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel className={label}>Drug License Number *</FormLabel>
-                                                        <FormControl>
-                                                            <input
-                                                                type="text"
-                                                                {...field}
-                                                                placeholder="TZ-HYD-123456"
-                                                                className={inputBaseMono}
-                                                            />
-                                                        </FormControl>
-                                                        <FormMessage className="text-[12px]" />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* STEP 2: LOCATION */}
-                            {step === 2 && (
-                                <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-200">
-                                    <div>
-                                        <span className={eyebrow}>Step 02 · Location</span>
-                                        <h2 className="text-[24px] font-semibold text-[var(--ink)] tracking-tight mt-1.5 [font-family:var(--font-display)]">
-                                            Primary dispatch & store hub
-                                        </h2>
-                                        <p className="text-[13.5px] text-[var(--ink)]/55 mt-1 leading-relaxed">Set up your head office or main store node.</p>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="md:col-span-2">
-                                            <FormField
-                                                control={form.control}
-                                                name="address.street"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel className={label}>Street Address</FormLabel>
-                                                        <FormControl>
-                                                            <input
-                                                                type="text"
-                                                                {...field}
-                                                                placeholder="Store #4, Retail Complex"
-                                                                className={inputBase}
-                                                            />
-                                                        </FormControl>
-                                                        <FormMessage className="text-[12px]" />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <FormField
-                                                control={form.control}
-                                                name="address.city"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel className={label}>City</FormLabel>
-                                                        <FormControl>
-                                                            <input
-                                                                type="text"
-                                                                {...field}
-                                                                placeholder="Hyderabad"
-                                                                className={inputBase}
-                                                            />
-                                                        </FormControl>
-                                                        <FormMessage className="text-[12px]" />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <FormField
-                                                control={form.control}
-                                                name="address.state"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel className={label}>State</FormLabel>
-                                                        <FormControl>
-                                                            <input
-                                                                type="text"
-                                                                {...field}
-                                                                placeholder="Telangana"
-                                                                className={inputBase}
-                                                            />
-                                                        </FormControl>
-                                                        <FormMessage className="text-[12px]" />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <FormField
-                                                control={form.control}
-                                                name="address.zipCode"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel className={label}>Postal Code</FormLabel>
-                                                        <FormControl>
-                                                            <input
-                                                                type="text"
-                                                                {...field}
-                                                                placeholder="500081"
-                                                                className={inputBaseMono}
-                                                            />
-                                                        </FormControl>
-                                                        <FormMessage className="text-[12px]" />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <FormField
-                                                control={form.control}
-                                                name="address.country"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel className={label}>Country</FormLabel>
-                                                        <FormControl>
-                                                            <input
-                                                                {...field}
-                                                                readOnly
-                                                                className={`${inputBase} bg-[var(--paper-dim)] text-[var(--ink)]/60`}
-                                                            />
-                                                        </FormControl>
-                                                        <FormMessage className="text-[12px]" />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* STEP 3: SCALE */}
-                            {step === 3 && (
-                                <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-200">
-                                    <div>
-                                        <span className={eyebrow}>Step 03 · Hardware & Scale</span>
-                                        <h2 className="text-[24px] font-semibold text-[var(--ink)] tracking-tight mt-1.5 [font-family:var(--font-display)]">
-                                            Capacity & POS infrastructure
-                                        </h2>
-                                        <p className="text-[13.5px] text-[var(--ink)]/55 mt-1 leading-relaxed">
-                                            Specify counter terminals, storage hubs, and staffing requirements.
-                                        </p>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                        <div>
-                                            <FormField
-                                                control={form.control}
-                                                name="outletsCount"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel className={label}>Active Outlets / Branches</FormLabel>
-                                                        <FormControl>
-                                                            <input
-                                                                type="number"
-                                                                min={1}
-                                                                {...field}
-                                                                className={inputBase}
-                                                            />
-                                                        </FormControl>
-                                                        <FormMessage className="text-[12px]" />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <FormField
-                                                control={form.control}
-                                                name="checkoutCountersCount"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel className={label}>Checkout Counters (POS terminals)</FormLabel>
-                                                        <FormControl>
-                                                            <input
-                                                                type="number"
-                                                                min={1}
-                                                                {...field}
-                                                                className={inputBase}
-                                                            />
-                                                        </FormControl>
-                                                        <FormMessage className="text-[12px]" />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <FormField
-                                                control={form.control}
-                                                name="warehousesCount"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel className={label}>Warehouses / Dark Stores</FormLabel>
-                                                        <FormControl>
-                                                            <input
-                                                                type="number"
-                                                                min={0}
-                                                                {...field}
-                                                                className={inputBase}
-                                                            />
-                                                        </FormControl>
-                                                        <FormMessage className="text-[12px]" />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </div>
-
-                                        <div>
-                                            <FormField
-                                                control={form.control}
-                                                name="monthlyOrdersEstimate"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel className={label}>Expected Monthly Transaction Volume</FormLabel>
-                                                        <FormControl>
-                                                            <select {...field} className={inputBase}>
-                                                                <option value="0-500">0–500 sales/mo</option>
-                                                                <option value="500-2000">500–2,000 sales/mo</option>
-                                                                <option value="2000-10000">2,000–10,000 sales/mo</option>
-                                                                <option value="10000+">High scale (10,000+)</option>
-                                                            </select>
-                                                        </FormControl>
-                                                        <FormMessage className="text-[12px]" />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* STEP 4: PLAN SELECTION */}
-                            {step === 4 && (
-                                <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-200">
-                                    <div className="flex flex-wrap items-start justify-between gap-4">
-                                        <div>
-                                            <span className={eyebrow}>Step 04 · Subscription Plan</span>
+                                            <span className={eyebrow}>Step 01 · Business Archetype</span>
                                             <h2 className="text-[24px] font-semibold text-[var(--ink)] tracking-tight mt-1.5 [font-family:var(--font-display)]">
-                                                Choose how you pay
+                                                Pharmaceutical operations domain
                                             </h2>
                                             <p className="text-[13.5px] text-[var(--ink)]/55 mt-1 leading-relaxed">
-                                                Start free for 14 days — no payment details required — or pick a paid plan and pay via UPI / bank transfer. Your modules are provisioned automatically from the plan you choose.
+                                                Drug-control workflows are pre-configured: batch tracking, drug licenses, CDSCO/FDA logs, and Rx rules.
                                             </p>
                                         </div>
-                                        <div className="flex items-center gap-1 bg-[var(--paper-dim)] p-1">
-                                            <button
-                                                type="button"
-                                                onClick={() => setPlanCycle("MONTHLY")}
-                                                className={`px-3 py-1.5 text-[12px] font-semibold transition-colors ${
-                                                    planCycle === "MONTHLY" ? "bg-white text-[var(--ink)] shadow-sm" : "text-[var(--ink)]/50"
-                                                }`}
-                                            >
-                                                Monthly
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => setPlanCycle("ANNUAL")}
-                                                className={`px-3 py-1.5 text-[12px] font-semibold transition-colors ${
-                                                    planCycle === "ANNUAL" ? "bg-white text-[var(--ink)] shadow-sm" : "text-[var(--ink)]/50"
-                                                }`}
-                                            >
-                                                Annual <span className="text-[var(--stamp)]">-20%</span>
-                                            </button>
+
+                                        {/* DOMAIN CONFIRMATION */}
+                                        <div className="p-4 border border-[var(--stamp)] bg-[var(--stamp-dim)] text-left flex flex-col justify-between transition-all select-none">
+                                            <div className="flex items-center justify-between mb-3">
+                                                <Pill size={18} className="text-[var(--stamp)]" />
+                                                <div className="w-4 h-4 bg-[var(--stamp)] border border-[var(--stamp)] flex items-center justify-center text-white">
+                                                    <Check size={10} strokeWidth={3} />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div className="text-[13.5px] font-semibold text-[var(--ink)]">Pharmaceuticals</div>
+                                                <div className="text-[11.5px] text-[var(--ink)]/50 mt-1 leading-normal">
+                                                    Batch tracking, Drug Licenses, CDSCO/FDA logs, Rx rules.
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                                            <div className="md:col-span-2">
+                                                <FormField
+                                                    control={form.control}
+                                                    name="businessName"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel className={label}>Business / Legal entity name *</FormLabel>
+                                                            <FormControl>
+                                                                <input
+                                                                    type="text"
+                                                                    {...field}
+                                                                    placeholder="e.g. Apex Healthcare & Retail LLP"
+                                                                    className={inputBase}
+                                                                />
+                                                            </FormControl>
+                                                            <FormMessage className="text-[12px]" />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <FormField
+                                                    control={form.control}
+                                                    name="gstinOrTaxId"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel className={label}>GSTIN / Tax Registration</FormLabel>
+                                                            <FormControl>
+                                                                <input
+                                                                    type="text"
+                                                                    {...field}
+                                                                    placeholder="15-CHAR ALPHANUMERIC"
+                                                                    className={inputBaseMono}
+                                                                />
+                                                            </FormControl>
+                                                            <FormMessage className="text-[12px]" />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <FormField
+                                                    control={form.control}
+                                                    name="panNumber"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel className={label}>PAN Number</FormLabel>
+                                                            <FormControl>
+                                                                <input type="text" {...field} placeholder="ABCDE1234F" className={inputBaseMono} />
+                                                            </FormControl>
+                                                            <FormMessage className="text-[12px]" />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </div>
+
+                                            {/* DYNAMIC REGULATORY FIELDS */}
+                                            <div>
+                                                <FormField
+                                                    control={form.control}
+                                                    name="drugLicenseNumber"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel className={label}>Drug License Number *</FormLabel>
+                                                            <FormControl>
+                                                                <input type="text" {...field} placeholder="TZ-HYD-123456" className={inputBaseMono} />
+                                                            </FormControl>
+                                                            <FormMessage className="text-[12px]" />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </div>
                                         </div>
                                     </div>
+                                )}
 
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                        {PLAN_CARDS.map(card => {
-                                            const active = planTier === card.tier;
-                                            const price = planCycle === "ANNUAL" ? card.annual : card.monthly;
-                                            return (
+                                {/* STEP 2: LOCATION */}
+                                {step === 2 && (
+                                    <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-200">
+                                        <div>
+                                            <span className={eyebrow}>Step 02 · Location</span>
+                                            <h2 className="text-[24px] font-semibold text-[var(--ink)] tracking-tight mt-1.5 [font-family:var(--font-display)]">
+                                                Primary dispatch & store hub
+                                            </h2>
+                                            <p className="text-[13.5px] text-[var(--ink)]/55 mt-1 leading-relaxed">
+                                                Set up your head office or main store node.
+                                            </p>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="md:col-span-2">
+                                                <FormField
+                                                    control={form.control}
+                                                    name="address.street"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel className={label}>Street Address</FormLabel>
+                                                            <FormControl>
+                                                                <input
+                                                                    type="text"
+                                                                    {...field}
+                                                                    placeholder="Store #4, Retail Complex"
+                                                                    className={inputBase}
+                                                                />
+                                                            </FormControl>
+                                                            <FormMessage className="text-[12px]" />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <FormField
+                                                    control={form.control}
+                                                    name="address.city"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel className={label}>City</FormLabel>
+                                                            <FormControl>
+                                                                <input type="text" {...field} placeholder="Hyderabad" className={inputBase} />
+                                                            </FormControl>
+                                                            <FormMessage className="text-[12px]" />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <FormField
+                                                    control={form.control}
+                                                    name="address.state"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel className={label}>State</FormLabel>
+                                                            <FormControl>
+                                                                <input type="text" {...field} placeholder="Telangana" className={inputBase} />
+                                                            </FormControl>
+                                                            <FormMessage className="text-[12px]" />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <FormField
+                                                    control={form.control}
+                                                    name="address.zipCode"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel className={label}>Postal Code</FormLabel>
+                                                            <FormControl>
+                                                                <input type="text" {...field} placeholder="500081" className={inputBaseMono} />
+                                                            </FormControl>
+                                                            <FormMessage className="text-[12px]" />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <FormField
+                                                    control={form.control}
+                                                    name="address.country"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel className={label}>Country</FormLabel>
+                                                            <FormControl>
+                                                                <input
+                                                                    {...field}
+                                                                    readOnly
+                                                                    className={`${inputBase} bg-[var(--paper-dim)] text-[var(--ink)]/60`}
+                                                                />
+                                                            </FormControl>
+                                                            <FormMessage className="text-[12px]" />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* STEP 3: SCALE */}
+                                {step === 3 && (
+                                    <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-200">
+                                        <div>
+                                            <span className={eyebrow}>Step 03 · Hardware & Scale</span>
+                                            <h2 className="text-[24px] font-semibold text-[var(--ink)] tracking-tight mt-1.5 [font-family:var(--font-display)]">
+                                                Capacity & POS infrastructure
+                                            </h2>
+                                            <p className="text-[13.5px] text-[var(--ink)]/55 mt-1 leading-relaxed">
+                                                Specify counter terminals, storage hubs, and staffing requirements.
+                                            </p>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                            <div>
+                                                <FormField
+                                                    control={form.control}
+                                                    name="outletsCount"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel className={label}>Active Outlets / Branches</FormLabel>
+                                                            <FormControl>
+                                                                <input type="number" min={1} {...field} className={inputBase} />
+                                                            </FormControl>
+                                                            <FormMessage className="text-[12px]" />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <FormField
+                                                    control={form.control}
+                                                    name="checkoutCountersCount"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel className={label}>Checkout Counters (POS terminals)</FormLabel>
+                                                            <FormControl>
+                                                                <input type="number" min={1} {...field} className={inputBase} />
+                                                            </FormControl>
+                                                            <FormMessage className="text-[12px]" />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <FormField
+                                                    control={form.control}
+                                                    name="warehousesCount"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel className={label}>Warehouses / Dark Stores</FormLabel>
+                                                            <FormControl>
+                                                                <input type="number" min={0} {...field} className={inputBase} />
+                                                            </FormControl>
+                                                            <FormMessage className="text-[12px]" />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </div>
+
+                                            <div>
+                                                <FormField
+                                                    control={form.control}
+                                                    name="monthlyOrdersEstimate"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormLabel className={label}>Expected Monthly Transaction Volume</FormLabel>
+                                                            <FormControl>
+                                                                <select {...field} className={inputBase}>
+                                                                    <option value="0-500">0–500 sales/mo</option>
+                                                                    <option value="500-2000">500–2,000 sales/mo</option>
+                                                                    <option value="2000-10000">2,000–10,000 sales/mo</option>
+                                                                    <option value="10000+">High scale (10,000+)</option>
+                                                                </select>
+                                                            </FormControl>
+                                                            <FormMessage className="text-[12px]" />
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* STEP 4: PLAN SELECTION */}
+                                {step === 4 && (
+                                    <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-200">
+                                        <div className="flex flex-wrap items-start justify-between gap-4">
+                                            <div>
+                                                <span className={eyebrow}>Step 04 · Subscription Plan</span>
+                                                <h2 className="text-[24px] font-semibold text-[var(--ink)] tracking-tight mt-1.5 [font-family:var(--font-display)]">
+                                                    Choose how you pay
+                                                </h2>
+                                                <p className="text-[13.5px] text-[var(--ink)]/55 mt-1 leading-relaxed">
+                                                    Start free for 14 days — no payment details required — or pick a paid plan and pay via UPI / bank
+                                                    transfer. Your modules are provisioned automatically from the plan you choose.
+                                                </p>
+                                            </div>
+                                            <div className="flex items-center gap-1 bg-[var(--paper-dim)] p-1">
                                                 <button
                                                     type="button"
-                                                    key={card.tier}
-                                                    onClick={() => {
-                                                        if (card.tier === "TRIAL_14_DAYS") {
-                                                            selectTrial();
-                                                        } else {
-                                                            openPaymentModal(card.tier);
-                                                        }
-                                                    }}
-                                                    className={`relative flex flex-col text-left p-4 border transition-all select-none ${
-                                                        active
-                                                            ? "bg-[var(--stamp-dim)] border-[var(--stamp)]/50"
-                                                            : "bg-white border-[var(--line)] hover:border-[var(--teal-mid)]"
+                                                    onClick={() => setPlanCycle("MONTHLY")}
+                                                    className={`px-3 py-1.5 text-[12px] font-semibold transition-colors ${
+                                                        planCycle === "MONTHLY" ? "bg-white text-[var(--ink)] shadow-sm" : "text-[var(--ink)]/50"
                                                     }`}
                                                 >
-                                                    {card.popular && (
-                                                        <span className="absolute right-3 top-3 bg-[var(--stamp)] text-white text-[9px] font-bold uppercase tracking-[0.1em] px-1.5 py-0.5 [font-family:var(--font-mono)]">
-                                                            Popular
-                                                        </span>
-                                                    )}
-                                                    <div className="flex items-center justify-between">
-                                                        <span className="text-[13px] font-semibold text-[var(--ink)]">{card.name}</span>
-                                                        <div
-                                                            className={`w-4 h-4 flex items-center justify-center transition-all shrink-0 ${
-                                                                active ? "bg-[var(--stamp)] text-white" : "border border-[var(--ink)]/25"
-                                                            }`}
-                                                        >
-                                                            {active && <Check size={10} strokeWidth={3} />}
-                                                        </div>
-                                                    </div>
-                                                    <div className="text-[10.5px] text-[var(--ink)]/45 mt-0.5 leading-tight">{card.tagline}</div>
-                                                    <div className="mt-3 flex items-baseline gap-1">
-                                                        <span className="text-[20px] font-bold text-[var(--ink)] [font-family:var(--font-display)]">
-                                                            ₹{price.toLocaleString("en-IN")}
-                                                        </span>
-                                                        <span className="text-[10.5px] text-[var(--ink)]/45 [font-family:var(--font-mono)]">
-                                                            / {card.tier === "TRIAL_14_DAYS" ? "14 days" : planCycle === "ANNUAL" ? "yr" : "mo"}
-                                                        </span>
-                                                    </div>
-                                                    <ul className="mt-3 space-y-1.5 border-t border-[var(--line)] pt-3">
-                                                        {card.features.map(f => (
-                                                            <li key={f} className="flex items-start gap-1.5 text-[11px] text-[var(--ink)]/70">
-                                                                <Check size={11} className="mt-0.5 text-[var(--teal-mid)] shrink-0" />
-                                                                {f}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
+                                                    Monthly
                                                 </button>
-                                            );
-                                        })}
-                                    </div>
-
-                                    {planConfirmed && planTier !== "TRIAL_14_DAYS" && (
-                                        <div className="flex items-start gap-2.5 border border-[var(--stamp)]/40 bg-[var(--stamp-dim)] p-3.5 text-[12.5px] leading-relaxed text-[var(--ink)]/80">
-                                            <CreditCard size={15} className="mt-0.5 shrink-0 text-[var(--stamp)]" />
-                                            <span>
-                                                <strong>{PLAN_CARDS.find(c => c.tier === planTier)?.name}</strong> selected · payment reference{" "}
-                                                <strong className="[font-family:var(--font-mono)]">{paymentDraft.transactionRef}</strong> submitted.
-                                                We&apos;ll verify it and activate your plan shortly.
-                                            </span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setPlanCycle("ANNUAL")}
+                                                    className={`px-3 py-1.5 text-[12px] font-semibold transition-colors ${
+                                                        planCycle === "ANNUAL" ? "bg-white text-[var(--ink)] shadow-sm" : "text-[var(--ink)]/50"
+                                                    }`}
+                                                >
+                                                    Annual <span className="text-[var(--stamp)]">-20%</span>
+                                                </button>
+                                            </div>
                                         </div>
-                                    )}
 
-                                    <div className="border border-[var(--line)] bg-[var(--paper)] p-4">
-                                        <div className="flex items-center justify-between gap-3">
-                                            <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--ink)]/50 [font-family:var(--font-mono)]">
-                                                Modules provisioned with this plan
-                                            </span>
-                                            <span className="text-[10.5px] text-[var(--ink)]/45 [font-family:var(--font-mono)]">
-                                                {Object.keys(MODULES_BY_TIER[planTier]).filter(k => MODULES_BY_TIER[planTier][k]).length}
-                                                {" / "}{Object.keys(MODULES_BY_TIER[planTier]).length} enabled
-                                            </span>
-                                        </div>
-                                        <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-3">
-                                            {Object.keys(MODULES_BY_TIER[planTier]).map(key => {
-                                                const active = MODULES_BY_TIER[planTier][key];
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                            {PLAN_CARDS.map(card => {
+                                                const active = planTier === card.tier;
+                                                const price = planCycle === "ANNUAL" ? card.annual : card.monthly;
                                                 return (
-                                                    <div
-                                                        key={key}
-                                                        className={`flex items-center gap-2 px-2.5 py-2 border text-[11.5px] transition-all ${
+                                                    <button
+                                                        type="button"
+                                                        key={card.tier}
+                                                        onClick={() => {
+                                                            if (card.tier === "TRIAL_14_DAYS") {
+                                                                selectTrial();
+                                                            } else {
+                                                                openPaymentModal(card.tier);
+                                                            }
+                                                        }}
+                                                        className={`relative flex flex-col text-left p-4 border transition-all select-none ${
                                                             active
-                                                                ? "border-[var(--teal-mid)]/25 bg-white text-[var(--ink)]"
-                                                                : "border-[var(--line)] text-[var(--ink)]/35"
+                                                                ? "bg-[var(--stamp-dim)] border-[var(--stamp)]/50"
+                                                                : "bg-white border-[var(--line)] hover:border-[var(--teal-mid)]"
                                                         }`}
                                                     >
-                                                        <div
-                                                            className={`w-3.5 h-3.5 flex items-center justify-center shrink-0 ${
-                                                                active ? "bg-[var(--teal-mid)] text-white" : "border border-[var(--ink)]/20"
-                                                            }`}
-                                                        >
-                                                            {active && <Check size={9} strokeWidth={3} />}
+                                                        {card.popular && (
+                                                            <span className="absolute right-3 top-3 bg-[var(--stamp)] text-white text-[9px] font-bold uppercase tracking-[0.1em] px-1.5 py-0.5 [font-family:var(--font-mono)]">
+                                                                Popular
+                                                            </span>
+                                                        )}
+                                                        <div className="flex items-center justify-between">
+                                                            <span className="text-[13px] font-semibold text-[var(--ink)]">{card.name}</span>
+                                                            <div
+                                                                className={`w-4 h-4 flex items-center justify-center transition-all shrink-0 ${
+                                                                    active ? "bg-[var(--stamp)] text-white" : "border border-[var(--ink)]/25"
+                                                                }`}
+                                                            >
+                                                                {active && <Check size={10} strokeWidth={3} />}
+                                                            </div>
                                                         </div>
-                                                        {MODULE_LABELS[key as FeatureKey] ?? key}
-                                                    </div>
+                                                        <div className="text-[10.5px] text-[var(--ink)]/45 mt-0.5 leading-tight">{card.tagline}</div>
+                                                        <div className="mt-3 flex items-baseline gap-1">
+                                                            <span className="text-[20px] font-bold text-[var(--ink)] [font-family:var(--font-display)]">
+                                                                ₹{price.toLocaleString("en-IN")}
+                                                            </span>
+                                                            <span className="text-[10.5px] text-[var(--ink)]/45 [font-family:var(--font-mono)]">
+                                                                / {card.tier === "TRIAL_14_DAYS" ? "14 days" : planCycle === "ANNUAL" ? "yr" : "mo"}
+                                                            </span>
+                                                        </div>
+                                                        <ul className="mt-3 space-y-1.5 border-t border-[var(--line)] pt-3">
+                                                            {card.features.map(f => (
+                                                                <li key={f} className="flex items-start gap-1.5 text-[11px] text-[var(--ink)]/70">
+                                                                    <Check size={11} className="mt-0.5 text-[var(--teal-mid)] shrink-0" />
+                                                                    {f}
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </button>
                                                 );
                                             })}
                                         </div>
+
+                                        {planConfirmed && planTier !== "TRIAL_14_DAYS" && (
+                                            <div className="flex items-start gap-2.5 border border-[var(--stamp)]/40 bg-[var(--stamp-dim)] p-3.5 text-[12.5px] leading-relaxed text-[var(--ink)]/80">
+                                                <CreditCard size={15} className="mt-0.5 shrink-0 text-[var(--stamp)]" />
+                                                <span>
+                                                    <strong>{PLAN_CARDS.find(c => c.tier === planTier)?.name}</strong> selected · payment reference{" "}
+                                                    <strong className="[font-family:var(--font-mono)]">{paymentDraft.transactionRef}</strong> submitted.
+                                                    We&apos;ll verify it and activate your plan shortly.
+                                                </span>
+                                            </div>
+                                        )}
+
+                                        <div className="border border-[var(--line)] bg-[var(--paper)] p-4">
+                                            <div className="flex items-center justify-between gap-3">
+                                                <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--ink)]/50 [font-family:var(--font-mono)]">
+                                                    Modules provisioned with this plan
+                                                </span>
+                                                <span className="text-[10.5px] text-[var(--ink)]/45 [font-family:var(--font-mono)]">
+                                                    {Object.keys(MODULES_BY_TIER[planTier]).filter(k => MODULES_BY_TIER[planTier][k]).length}
+                                                    {" / "}
+                                                    {Object.keys(MODULES_BY_TIER[planTier]).length} enabled
+                                                </span>
+                                            </div>
+                                            <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-3">
+                                                {Object.keys(MODULES_BY_TIER[planTier]).map(key => {
+                                                    const active = MODULES_BY_TIER[planTier][key];
+                                                    return (
+                                                        <div
+                                                            key={key}
+                                                            className={`flex items-center gap-2 px-2.5 py-2 border text-[11.5px] transition-all ${
+                                                                active
+                                                                    ? "border-[var(--teal-mid)]/25 bg-white text-[var(--ink)]"
+                                                                    : "border-[var(--line)] text-[var(--ink)]/35"
+                                                            }`}
+                                                        >
+                                                            <div
+                                                                className={`w-3.5 h-3.5 flex items-center justify-center shrink-0 ${
+                                                                    active ? "bg-[var(--teal-mid)] text-white" : "border border-[var(--ink)]/20"
+                                                                }`}
+                                                            >
+                                                                {active && <Check size={9} strokeWidth={3} />}
+                                                            </div>
+                                                            {MODULE_LABELS[key as FeatureKey] ?? key}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            )}
-                        </div>
+                                )}
+                            </div>
 
-                        {/* FOOTER ACTIONS */}
-                        <div className="pt-8 border-t border-[var(--line)] mt-8">
-                            {error && (
-                                <div className="flex items-start gap-2.5 bg-[var(--danger-bg)] border border-[var(--danger)]/25 text-[var(--danger)] text-[12.5px] leading-relaxed p-3.5 mb-6">
-                                    <AlertTriangle size={15} className="mt-0.5 shrink-0" />
-                                    <span>{error}</span>
-                                </div>
-                            )}
-                            <div className="flex items-center justify-between">
-                                <button
-                                    type="button"
-                                    onClick={prevStep}
-                                    disabled={step === 1 || saving}
-                                    className={`flex items-center gap-2 px-4 py-2.5 border border-[var(--line)] text-[12.5px] font-medium transition-all ${
-                                        step === 1 || saving ? "opacity-30 cursor-not-allowed text-[var(--ink)]" : "text-[var(--ink)] hover:bg-[var(--paper-dim)]"
-                                    }`}
-                                >
-                                    <ArrowLeft size={14} />
-                                    Previous
-                                </button>
+                            {/* FOOTER ACTIONS */}
+                            <div className="pt-8 border-t border-[var(--line)] mt-8">
+                                {error && (
+                                    <div className="flex items-start gap-2.5 bg-[var(--danger-bg)] border border-[var(--danger)]/25 text-[var(--danger)] text-[12.5px] leading-relaxed p-3.5 mb-6">
+                                        <AlertTriangle size={15} className="mt-0.5 shrink-0" />
+                                        <span>{error}</span>
+                                    </div>
+                                )}
+                                <div className="flex items-center justify-between">
+                                    <button
+                                        type="button"
+                                        onClick={prevStep}
+                                        disabled={step === 1 || saving}
+                                        className={`flex items-center gap-2 px-4 py-2.5 border border-[var(--line)] text-[12.5px] font-medium transition-all ${
+                                            step === 1 || saving
+                                                ? "opacity-30 cursor-not-allowed text-[var(--ink)]"
+                                                : "text-[var(--ink)] hover:bg-[var(--paper-dim)]"
+                                        }`}
+                                    >
+                                        <ArrowLeft size={14} />
+                                        Previous
+                                    </button>
 
-                                <button
-                                    type="button"
-                                    onClick={nextStep}
-                                    disabled={saving || (step === 4 && !planConfirmed)}
-                                    className="flex items-center gap-2 px-6 py-2.5 bg-[var(--teal-deep)] text-white text-[12.5px] font-medium hover:bg-[var(--teal-mid)] transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
-                                >
-                                    {saving ? (
-                                        <Loader2 size={14} className="animate-spin" />
-                                    ) : step === 4 ? (
-                                        <Check size={14} />
-                                    ) : (
-                                        <ArrowRight size={14} />
-                                    )}
-                                    {saving ? "Saving workspace…" : step === 4 ? "Complete provision" : "Next step"}
-                                </button>
+                                    <button
+                                        type="button"
+                                        onClick={nextStep}
+                                        disabled={saving || (step === 4 && !planConfirmed)}
+                                        className="flex items-center gap-2 px-6 py-2.5 bg-[var(--teal-deep)] text-white text-[12.5px] font-medium hover:bg-[var(--teal-mid)] transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                                    >
+                                        {saving ? (
+                                            <Loader2 size={14} className="animate-spin" />
+                                        ) : step === 4 ? (
+                                            <Check size={14} />
+                                        ) : (
+                                            <ArrowRight size={14} />
+                                        )}
+                                        {saving ? "Saving workspace…" : step === 4 ? "Complete provision" : "Next step"}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </form>
+                </form>
             </Form>
 
             {/* ── OFFLINE PAYMENT MODAL ── */}
@@ -1016,11 +972,15 @@ export default function OnboardingPage() {
                                     </div>
                                     <div className="flex justify-between gap-3">
                                         <dt className="text-[var(--ink)]/50">Account No.</dt>
-                                        <dd className="text-right font-semibold text-[var(--ink)] [font-family:var(--font-mono)]">{PAYMENT_DETAILS.bank.accountNumber}</dd>
+                                        <dd className="text-right font-semibold text-[var(--ink)] [font-family:var(--font-mono)]">
+                                            {PAYMENT_DETAILS.bank.accountNumber}
+                                        </dd>
                                     </div>
                                     <div className="flex justify-between gap-3">
                                         <dt className="text-[var(--ink)]/50">IFSC</dt>
-                                        <dd className="text-right font-semibold text-[var(--ink)] [font-family:var(--font-mono)]">{PAYMENT_DETAILS.bank.ifsc}</dd>
+                                        <dd className="text-right font-semibold text-[var(--ink)] [font-family:var(--font-mono)]">
+                                            {PAYMENT_DETAILS.bank.ifsc}
+                                        </dd>
                                     </div>
                                 </dl>
                             </div>

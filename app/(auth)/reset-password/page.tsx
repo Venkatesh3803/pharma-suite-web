@@ -1,19 +1,13 @@
 "use client";
 
-import React, { useSyncExternalStore, useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ApiError, authApi } from "@/lib/api";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
 
 import { Space_Grotesk, IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import { ShieldCheck, Loader2, Lock, AlertTriangle, Radio, KeyRound, ArrowLeft, ArrowRight, CheckCircle2, Eye, EyeOff } from "lucide-react";
@@ -48,19 +42,6 @@ const THEME = {
     ["--danger-bg" as string]: "#FBEDE9"
 } as React.CSSProperties;
 
-const RESET_TOKEN_KEY = "pharmasuite_reset_token";
-const UNSET_TOKEN = "";
-
-function readResetToken(): string | null {
-    if (typeof window === "undefined") return UNSET_TOKEN;
-    return window.sessionStorage.getItem(RESET_TOKEN_KEY);
-}
-
-function subscribeToStorage(onChange: () => void) {
-    window.addEventListener("storage", onChange);
-    return () => window.removeEventListener("storage", onChange);
-}
-
 function friendlyError(err: unknown, fallback: string): string {
     if (err instanceof ApiError) return err.message;
     return fallback;
@@ -68,20 +49,21 @@ function friendlyError(err: unknown, fallback: string): string {
 
 const resetPasswordSchema = z
     .object({
-        newPassword: z.string().trim().min(8, "Your new password must be at least 8 characters."),
-        confirmPassword: z.string(),
+        newPassword: z
+            .string()
+            .trim()
+            .min(8, "Your new password must be at least 8 characters and include both letters and numbers.")
+            .regex(/^(?=.*[A-Za-z])(?=.*\d)/, "Include both letters and numbers."),
+        confirmPassword: z.string()
     })
     .refine(v => v.newPassword === v.confirmPassword, {
         message: "The two passwords don't match.",
-        path: ["confirmPassword"],
+        path: ["confirmPassword"]
     });
 
 type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
 
 export default function ResetPasswordPage() {
-    const tokenSnapshot = useSyncExternalStore(subscribeToStorage, readResetToken, () => UNSET_TOKEN);
-    const checked = tokenSnapshot !== UNSET_TOKEN;
-    const token = checked ? tokenSnapshot : null;
     const [showNew, setShowNew] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
     const [error, setError] = useState("");
@@ -92,7 +74,7 @@ export default function ResetPasswordPage() {
 
     const form = useForm<ResetPasswordFormValues>({
         resolver: zodResolver(resetPasswordSchema),
-        defaultValues: { newPassword: "", confirmPassword: "" },
+        defaultValues: { newPassword: "", confirmPassword: "" }
     });
 
     const handleReset = async (values: ResetPasswordFormValues) => {
@@ -100,8 +82,8 @@ export default function ResetPasswordPage() {
         setNotice("");
         setLoading(true);
         try {
-            await authApi.resetPassword(token as string, values.newPassword, values.confirmPassword);
-            sessionStorage.removeItem(RESET_TOKEN_KEY);
+            // Reset grant travels in the HttpOnly cookie set by verify-otp.
+            await authApi.resetPassword(values.newPassword, values.confirmPassword);
             setSuccess(true);
         } catch (err) {
             setError(friendlyError(err, "We couldn't update your password right now. Please try again."));
@@ -211,9 +193,7 @@ export default function ResetPasswordPage() {
 
             <div className="flex-1 flex flex-col justify-center px-6 py-14 sm:px-12 md:px-20">
                 <div className="w-full max-w-sm mx-auto">
-                    {!checked ? (
-                        <span className={eyebrow}>Loading...</span>
-                    ) : success ? (
+                    {success ? (
                         <>
                             <span className={eyebrow}>Password reset successful</span>
                             <h2 className="text-[26px] font-semibold text-[var(--ink)] tracking-tight mt-2 [font-family:var(--font-display)]">
@@ -226,20 +206,6 @@ export default function ResetPasswordPage() {
                             <button onClick={continueToLogin} className={`${primaryButton} mt-6`}>
                                 Continue to Login <ArrowRight size={16} />
                             </button>
-                        </>
-                    ) : !token ? (
-                        <>
-                            <span className={eyebrow}>Session expired</span>
-                            <h2 className="text-[26px] font-semibold text-[var(--ink)] tracking-tight mt-2 [font-family:var(--font-display)]">
-                                Start the reset again
-                            </h2>
-                            <div className="flex items-start gap-2.5 bg-[var(--danger-bg)] border border-[var(--danger)]/25 text-[var(--danger)] text-[12.5px] leading-relaxed p-3.5 mt-6">
-                                <AlertTriangle size={15} className="mt-0.5 shrink-0" />
-                                <span>Your password reset session has expired or is invalid. Please request a new verification code to continue.</span>
-                            </div>
-                            <Link href="/forgot-password" className={`${primaryButton} mt-6 inline-flex text-center`}>
-                                Go to Forgot Password <ArrowRight size={16} />
-                            </Link>
                         </>
                     ) : (
                         <>
@@ -257,6 +223,16 @@ export default function ResetPasswordPage() {
                                     <span>{error}</span>
                                 </div>
                             )}
+                            {error && (
+                                <div className="text-center mt-4 text-[12.5px]">
+                                    <Link
+                                        href="/forgot-password"
+                                        className="text-[var(--teal-deep)] hover:text-[var(--stamp)] font-semibold transition-colors"
+                                    >
+                                        Request a new verification code
+                                    </Link>
+                                </div>
+                            )}
 
                             {notice && (
                                 <div className="flex items-start gap-2.5 bg-[var(--teal-deep)]/10 border border-[var(--teal-mid)]/30 text-[var(--teal-deep)] text-[12.5px] leading-relaxed p-3.5 mt-6 [font-family:var(--font-mono)]">
@@ -266,88 +242,88 @@ export default function ResetPasswordPage() {
                             )}
 
                             <Form {...form}>
-                            <form onSubmit={form.handleSubmit(handleReset)} className="flex flex-col gap-5 mt-7" noValidate>
-                                <FormField
-                                    control={form.control}
-                                    name="newPassword"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <label htmlFor="new-password" className={label}>
-                                                New password
-                                            </label>
-                                            <div className="relative">
-                                                <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--ink)]/35" />
-                                                <FormControl>
-                                                <input
-                                                    id="new-password"
-                                                    type={showNew ? "text" : "password"}
-                                                    autoComplete="new-password"
-                                                    {...field}
-                                                    placeholder="At least 8 characters"
-                                                    className={passwordInputBase}
-                                                />
-                                                </FormControl>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setShowNew(v => !v)}
-                                                    aria-label={showNew ? "Hide new password" : "Show new password"}
-                                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--ink)]/35 hover:text-[var(--teal-deep)] transition-colors"
-                                                >
-                                                    {showNew ? <EyeOff size={15} /> : <Eye size={15} />}
-                                                </button>
-                                            </div>
-                                            <FormMessage className="text-[12px]" />
-                                        </FormItem>
-                                    )}
-                                />
+                                <form onSubmit={form.handleSubmit(handleReset)} className="flex flex-col gap-5 mt-7" noValidate>
+                                    <FormField
+                                        control={form.control}
+                                        name="newPassword"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <label htmlFor="new-password" className={label}>
+                                                    New password
+                                                </label>
+                                                <div className="relative">
+                                                    <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--ink)]/35" />
+                                                    <FormControl>
+                                                        <input
+                                                            id="new-password"
+                                                            type={showNew ? "text" : "password"}
+                                                            autoComplete="new-password"
+                                                            {...field}
+                                                            placeholder="At least 8 characters"
+                                                            className={passwordInputBase}
+                                                        />
+                                                    </FormControl>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowNew(v => !v)}
+                                                        aria-label={showNew ? "Hide new password" : "Show new password"}
+                                                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--ink)]/35 hover:text-[var(--teal-deep)] transition-colors"
+                                                    >
+                                                        {showNew ? <EyeOff size={15} /> : <Eye size={15} />}
+                                                    </button>
+                                                </div>
+                                                <FormMessage className="text-[12px]" />
+                                            </FormItem>
+                                        )}
+                                    />
 
-                                <FormField
-                                    control={form.control}
-                                    name="confirmPassword"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <label htmlFor="confirm-password" className={label}>
-                                                Confirm password
-                                            </label>
-                                            <div className="relative">
-                                                <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--ink)]/35" />
-                                                <FormControl>
-                                                <input
-                                                    id="confirm-password"
-                                                    type={showConfirm ? "text" : "password"}
-                                                    autoComplete="new-password"
-                                                    {...field}
-                                                    placeholder="Repeat the password"
-                                                    className={passwordInputBase}
-                                                />
-                                                </FormControl>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setShowConfirm(v => !v)}
-                                                    aria-label={showConfirm ? "Hide confirmation password" : "Show confirmation password"}
-                                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--ink)]/35 hover:text-[var(--teal-deep)] transition-colors"
-                                                >
-                                                    {showConfirm ? <EyeOff size={15} /> : <Eye size={15} />}
-                                                </button>
-                                            </div>
-                                            <FormMessage className="text-[12px]" />
-                                        </FormItem>
-                                    )}
-                                />
+                                    <FormField
+                                        control={form.control}
+                                        name="confirmPassword"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <label htmlFor="confirm-password" className={label}>
+                                                    Confirm password
+                                                </label>
+                                                <div className="relative">
+                                                    <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--ink)]/35" />
+                                                    <FormControl>
+                                                        <input
+                                                            id="confirm-password"
+                                                            type={showConfirm ? "text" : "password"}
+                                                            autoComplete="new-password"
+                                                            {...field}
+                                                            placeholder="Repeat the password"
+                                                            className={passwordInputBase}
+                                                        />
+                                                    </FormControl>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setShowConfirm(v => !v)}
+                                                        aria-label={showConfirm ? "Hide confirmation password" : "Show confirmation password"}
+                                                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--ink)]/35 hover:text-[var(--teal-deep)] transition-colors"
+                                                    >
+                                                        {showConfirm ? <EyeOff size={15} /> : <Eye size={15} />}
+                                                    </button>
+                                                </div>
+                                                <FormMessage className="text-[12px]" />
+                                            </FormItem>
+                                        )}
+                                    />
 
-                                <button type="submit" disabled={loading} className={primaryButton}>
-                                    {loading ? (
-                                        <>
-                                            <Loader2 size={16} className="animate-spin" aria-hidden="true" />
-                                            <span aria-live="polite">Updating Password...</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            Reset Password <ArrowRight size={16} />
-                                        </>
-                                    )}
-                                </button>
-                            </form>
+                                    <button type="submit" disabled={loading} className={primaryButton}>
+                                        {loading ? (
+                                            <>
+                                                <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+                                                <span aria-live="polite">Updating Password...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                Reset Password <ArrowRight size={16} />
+                                            </>
+                                        )}
+                                    </button>
+                                </form>
                             </Form>
                         </>
                     )}

@@ -1,6 +1,4 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
-
-const ACCESS_TOKEN_KEY = "pharmasuite_access";
 const REFRESH_URL = "/api/auth/refresh";
 
 export interface AuthUser {
@@ -14,11 +12,6 @@ export interface AuthUser {
   organizationName: string;
   branchName: string | null;
   permissions?: string[];
-}
-
-export interface AuthResponse {
-  user: AuthUser;
-  accessToken: string;
 }
 
 export interface BranchSummary {
@@ -87,19 +80,18 @@ interface ApiEnvelope<T> {
 
 let refreshPromise: Promise<string | null> | null = null;
 
-export function getAccessToken(): string | null {
-  if (typeof window === "undefined") return null;
-  return window.localStorage.getItem(ACCESS_TOKEN_KEY);
+// Legacy token helpers removed — HttpOnly cookie is the single credential.
+// Kept for potential migration cleanup; no-op in current flow.
+export function getAccessToken(): null {
+  return null;
 }
 
-export function setAccessToken(token: string): void {
-  if (typeof window === "undefined") return;
-  window.localStorage.setItem(ACCESS_TOKEN_KEY, token);
+export function setAccessToken(_token: string): void {
+  // No-op: access token lives in HttpOnly cookie
 }
 
 export function clearAccessToken(): void {
-  if (typeof window === "undefined") return;
-  window.localStorage.removeItem(ACCESS_TOKEN_KEY);
+  // No-op: access token lives in HttpOnly cookie
 }
 
 export function setOnboardedCookie(): void {
@@ -116,14 +108,17 @@ async function refreshAccessToken(): Promise<string | null> {
   if (!refreshPromise) {
     refreshPromise = (async () => {
       try {
-        const res = await rawFetch<{ accessToken: string }>(REFRESH_URL, {
+        const res = await rawFetch<{ accessToken?: string }>(REFRESH_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: "{}",
           skipAuth: true,
         });
-        setAccessToken(res.data.accessToken);
-        return res.data.accessToken;
+        // Session now lives in the HttpOnly cookie set by the backend.
+        // Do NOT persist to localStorage. Return the token (when present)
+        // so the retried request can use it directly in-memory; otherwise
+        // return a non-empty sentinel — the cookie itself is the credential.
+        return res.data.accessToken ?? "cookie";
       } catch {
         clearAccessToken();
         return null;
@@ -145,10 +140,7 @@ async function rawFetch<T>(
   if (!(init.body instanceof FormData) && init.body && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
-  if (!skipAuth) {
-    const token = getAccessToken();
-    if (token) headers.set("Authorization", `Bearer ${token}`);
-  }
+  // Cookie-only auth: no Authorization header. credentials: "include" sends cookies automatically.
 
   const res = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
@@ -197,9 +189,11 @@ export async function apiFetch<T>(
       err.status === 401 &&
       !path.startsWith("/api/auth/")
     ) {
-      const newToken = await refreshAccessToken();
-      if (newToken) {
+      const refreshed = await refreshAccessToken();
+      if (refreshed) {
         try {
+          // Cookie is already set by refresh; retry with same options
+          // (credentials: "include" will send the new cookie automatically)
           const retried = await rawFetch<T>(path, options);
           return retried.data;
         } catch {
@@ -218,8 +212,7 @@ export async function fetchFile(
 ): Promise<Blob> {
   const doFetch = async (): Promise<Blob> => {
     const headers = new Headers(options.headers);
-    const token = getAccessToken();
-    if (token) headers.set("Authorization", `Bearer ${token}`);
+    // Cookie-only auth: credentials: "include" sends cookies automatically
     const res = await fetch(`${API_BASE_URL}${path}`, {
       ...options,
       headers,
@@ -241,16 +234,16 @@ export async function fetchFile(
     return await doFetch();
   } catch (err) {
     if (err instanceof ApiError && err.status === 401 && !path.startsWith("/api/auth/")) {
-      const newToken = await refreshAccessToken();
-      if (newToken) return doFetch();
+      const refreshed = await refreshAccessToken();
+      if (refreshed) return doFetch();
     }
     throw err;
   }
 }
 
 export const authApi = {
-  async register(input: RegisterInput): Promise<AuthResponse> {
-    return apiFetch<AuthResponse>("/api/auth/register", {
+  async register(input: RegisterInput): Promise<AuthUser> {
+    const data = await apiFetch<{ user: AuthUser }>("/api/auth/register", {
       method: "POST",
       body: JSON.stringify({
         fullName: input.fullName,
@@ -264,13 +257,15 @@ export const authApi = {
         state: input.state,
       }),
     });
+    return data.user;
   },
 
-  async login(username: string, password: string): Promise<AuthResponse> {
-    return apiFetch<AuthResponse>("/api/auth/login", {
+  async login(username: string, password: string): Promise<AuthUser> {
+    const data = await apiFetch<{ user: AuthUser }>("/api/auth/login", {
       method: "POST",
       body: JSON.stringify({ username, password }),
     });
+    return data.user;
   },
 
   async logout(): Promise<void> {
@@ -289,21 +284,25 @@ export const authApi = {
     });
   },
 
-  async verifyOtp(email: string, otp: string): Promise<{ resetToken: string }> {
-    return apiFetch<{ resetToken: string }>("/api/auth/verify-otp", {
+  async verifyOtp(email: string, otp: string): Promise<{ verified: boolean }> {
+    return apiFetch<{ verified: boolean }>("/api/auth/verify-otp", {
       method: "POST",
       body: JSON.stringify({ email, otp }),
     });
   },
 
   async resetPassword(
-    resetToken: string,
     newPassword: string,
     confirmPassword: string,
+    resetToken?: string,
   ): Promise<void> {
+    // The reset token travels in the HttpOnly `pharmasuite_reset` cookie set
+    // by verify-otp. The explicit token param is a legacy fallback only.
     await apiFetch<null>("/api/auth/reset-password", {
       method: "POST",
-      body: JSON.stringify({ resetToken, newPassword, confirmPassword }),
+      body: JSON.stringify(
+        resetToken ? { resetToken, newPassword, confirmPassword } : { newPassword, confirmPassword },
+      ),
     });
   },
 };
@@ -1362,6 +1361,7 @@ export interface PosLookupRow {
   gstRate: number;
   saleUnit: string;
   saleUnitFactor: number;
+  baseUnit: string;
   sellableBase: number;
   stockSaleUnits: number;
   stockDisplay: string;

@@ -6,7 +6,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
-  ArrowLeft,
   Building2,
   Clock,
   Loader2,
@@ -15,8 +14,6 @@ import {
   Plus,
   ReceiptText,
   TrendingUp,
-  Truck,
-  X,
 } from "lucide-react";
 import {
   suppliersApi,
@@ -24,7 +21,8 @@ import {
   type SupplierRow,
   type VendorPerformance,
 } from "@/lib/api";
-import { useAppSelector } from "@/lib/redux/hooks";
+import type { LoadState } from "@/lib/hooks/usePaginatedList";
+import { usePermissions } from "@/lib/hooks/usePermissions";
 import { formatINR, formatDate } from "@/lib/inventory";
 import {
   Form,
@@ -34,6 +32,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  BackLink,
+  ErrorState,
+  Modal,
+  PrimaryButton,
+  SecondaryButton,
+  inputBase,
+} from "@/components/common";
 
 const supplierFormSchema = z.object({
   name: z.string().min(1, "Vendor name is required."),
@@ -52,17 +58,11 @@ const supplierFormSchema = z.object({
 
 type SupplierFormValues = z.infer<typeof supplierFormSchema>;
 
-type LoadState = "loading" | "error" | "ready";
-
-const inputBase =
-  "w-full rounded-lg border border-line bg-white px-3 py-2 text-[13.5px] text-ink placeholder:text-ink/35 focus:outline-none focus:border-teal-mid focus:ring-2 focus:ring-teal-mid/15 transition-all font-body";
-
 export default function SupplierDetailPage() {
   const params = useParams<{ supplierId: string }>();
   const router = useRouter();
-  const user = useAppSelector(state => state.auth.user);
-  const canManage =
-    user?.role === "SUPER_ADMIN" || user?.role === "OWNER" || user?.role === "MANAGER";
+  const { can } = usePermissions();
+  const canManage = can.isManagerOrAbove();
 
   const [state, setState] = useState<LoadState>("loading");
   const [error, setError] = useState("");
@@ -163,15 +163,11 @@ export default function SupplierDetailPage() {
   if (state === "error" || !supplier) {
     return (
       <div className="flex flex-col items-start gap-3">
-        <button
-          onClick={() => router.push("/suppliers")}
-          className="flex cursor-pointer items-center gap-1.5 text-[13px] font-semibold text-teal-mid"
-        >
-          <ArrowLeft size={15} /> Back to suppliers
-        </button>
-        <div className="w-full rounded-2xl border border-danger/40 bg-danger-bg px-3 py-2 text-[13px] text-danger">
-          {error}
-        </div>
+        <BackLink href="/suppliers" label="Back to suppliers" />
+        <ErrorState
+          title="Could not load vendor."
+          description={error}
+        />
       </div>
     );
   }
@@ -201,12 +197,7 @@ export default function SupplierDetailPage() {
 
   return (
     <div className="flex w-full flex-col gap-6">
-      <button
-        onClick={() => router.push("/suppliers")}
-        className="flex w-fit cursor-pointer items-center gap-1.5 text-[13px] font-semibold text-teal-mid"
-      >
-        <ArrowLeft size={15} /> Back to suppliers
-      </button>
+      <BackLink href="/suppliers" label="Back to suppliers" />
 
       {/* ── Header ── */}
       <div className="flex items-start justify-between rounded-2xl border border-line bg-white p-5 shadow-[0_1px_2px_rgba(20,32,28,0.04)]">
@@ -256,12 +247,9 @@ export default function SupplierDetailPage() {
           </div>
         </div>
         {canManage && (
-          <button
-            onClick={() => setEditing(true)}
-            className="cursor-pointer rounded-lg border border-line px-3.5 py-2 text-[13px] font-semibold text-ink/70 transition-colors hover:bg-paper-dim"
-          >
+          <SecondaryButton onClick={() => setEditing(true)} className="px-3.5 py-2 text-[13px]">
             Edit Vendor
-          </button>
+          </SecondaryButton>
         )}
       </div>
 
@@ -295,12 +283,12 @@ export default function SupplierDetailPage() {
                 Purchase History
               </span>
             </div>
-            <button
+            <SecondaryButton
               onClick={() => router.push(`/purchase/order/new?supplier=${supplier.id}`)}
-              className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-teal-mid/30 bg-teal-mid/10 px-3 py-1.5 text-[12px] font-semibold text-teal-mid transition-colors hover:bg-teal-mid hover:text-white"
+              className="border-teal-mid/30 bg-teal-mid/10 px-3 py-1.5 text-teal-mid hover:border-teal-mid hover:bg-teal-mid hover:text-white"
             >
               <Plus size={13} /> New PO
-            </button>
+            </SecondaryButton>
           </div>
           <div>
             {supplier.purchases.length === 0 && (
@@ -381,170 +369,168 @@ export default function SupplierDetailPage() {
         </div>
       </div>
 
-      {/* ── Edit Modal ── */}
-      {editing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 p-4">
-          <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-line bg-white shadow-xl">
-            <div className="flex items-center justify-between border-b border-line px-5 py-3.5">
-              <div className="flex items-center gap-2">
-                <Truck size={15} className="text-teal-mid" />
-                <span className="font-display text-[15px] font-semibold text-ink">Edit Vendor</span>
-              </div>
-              <button onClick={() => setEditing(false)} className="cursor-pointer text-ink/40 hover:text-ink">
-                <X size={17} />
-              </button>
+      <Modal
+        open={editing}
+        onClose={() => setEditing(false)}
+        eyebrow="Vendor Master"
+        title="Edit Vendor"
+        width="lg"
+        className="flex max-h-[85vh] flex-col overflow-hidden"
+        bodyClassName="overflow-y-auto"
+        footer={
+          <>
+            <button
+              type="button"
+              onClick={() => setEditing(false)}
+              className="cursor-pointer rounded-lg border border-line px-4 py-2 text-[13px] font-semibold text-ink/60 transition-colors hover:bg-paper-dim"
+            >
+              Cancel
+            </button>
+            <PrimaryButton
+              type="submit"
+              form="supplier-edit-form"
+              disabled={saving}
+              className="border border-teal-mid/30 bg-teal-mid px-4 py-2 text-white"
+            >
+              {saving && <Loader2 size={14} className="animate-spin" />}
+              {saving ? "Saving…" : "Save Changes"}
+            </PrimaryButton>
+          </>
+        }
+      >
+        <Form {...form}>
+          <form id="supplier-edit-form" onSubmit={form.handleSubmit(onSubmit)}>
+            <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem className="sm:col-span-2">
+                    <FormLabel className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-ink/55">
+                      Vendor Name *
+                    </FormLabel>
+                    <FormControl>
+                      <input {...field} className={inputBase} />
+                    </FormControl>
+                    <FormMessage className="text-[12px]" />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="contactPerson"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-ink/55">
+                      Contact Person
+                    </FormLabel>
+                    <FormControl>
+                      <input {...field} className={inputBase} />
+                    </FormControl>
+                    <FormMessage className="text-[12px]" />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-ink/55">
+                      Phone
+                    </FormLabel>
+                    <FormControl>
+                      <input {...field} className={inputBase} />
+                    </FormControl>
+                    <FormMessage className="text-[12px]" />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-ink/55">
+                      Email
+                    </FormLabel>
+                    <FormControl>
+                      <input type="email" {...field} className={inputBase} />
+                    </FormControl>
+                    <FormMessage className="text-[12px]" />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="gstin"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-ink/55">
+                      GSTIN
+                    </FormLabel>
+                    <FormControl>
+                      <input {...field} className={inputBase} />
+                    </FormControl>
+                    <FormMessage className="text-[12px]" />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="paymentTerms"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-ink/55">
+                      Payment Terms
+                    </FormLabel>
+                    <FormControl>
+                      <input {...field} className={inputBase} />
+                    </FormControl>
+                    <FormMessage className="text-[12px]" />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="leadTimeDays"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-ink/55">
+                      Lead Time (days)
+                    </FormLabel>
+                    <FormControl>
+                      <input
+                        type="number"
+                        min={1}
+                        value={field.value ?? ""}
+                        onChange={e => field.onChange(e.target.valueAsNumber)}
+                        className={inputBase}
+                      />
+                    </FormControl>
+                    <FormMessage className="text-[12px]" />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem className="sm:col-span-2">
+                    <FormLabel className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-ink/55">
+                      Address
+                    </FormLabel>
+                    <FormControl>
+                      <input {...field} className={inputBase} />
+                    </FormControl>
+                    <FormMessage className="text-[12px]" />
+                  </FormItem>
+                )}
+              />
             </div>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)}>
-                <div className="grid grid-cols-1 gap-3.5 px-5 py-4 sm:grid-cols-2">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem className="sm:col-span-2">
-                        <FormLabel className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-ink/55">
-                          Vendor Name *
-                        </FormLabel>
-                        <FormControl>
-                          <input {...field} className={inputBase} />
-                        </FormControl>
-                        <FormMessage className="text-[12px]" />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="contactPerson"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-ink/55">
-                          Contact Person
-                        </FormLabel>
-                        <FormControl>
-                          <input {...field} className={inputBase} />
-                        </FormControl>
-                        <FormMessage className="text-[12px]" />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-ink/55">
-                          Phone
-                        </FormLabel>
-                        <FormControl>
-                          <input {...field} className={inputBase} />
-                        </FormControl>
-                        <FormMessage className="text-[12px]" />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-ink/55">
-                          Email
-                        </FormLabel>
-                        <FormControl>
-                          <input type="email" {...field} className={inputBase} />
-                        </FormControl>
-                        <FormMessage className="text-[12px]" />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="gstin"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-ink/55">
-                          GSTIN
-                        </FormLabel>
-                        <FormControl>
-                          <input {...field} className={inputBase} />
-                        </FormControl>
-                        <FormMessage className="text-[12px]" />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="paymentTerms"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-ink/55">
-                          Payment Terms
-                        </FormLabel>
-                        <FormControl>
-                          <input {...field} className={inputBase} />
-                        </FormControl>
-                        <FormMessage className="text-[12px]" />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="leadTimeDays"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-ink/55">
-                          Lead Time (days)
-                        </FormLabel>
-                        <FormControl>
-                          <input
-                            type="number"
-                            min={1}
-                            value={field.value ?? ""}
-                            onChange={e => field.onChange(e.target.valueAsNumber)}
-                            className={inputBase}
-                          />
-                        </FormControl>
-                        <FormMessage className="text-[12px]" />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="address"
-                    render={({ field }) => (
-                      <FormItem className="sm:col-span-2">
-                        <FormLabel className="mb-1 block text-[11px] font-semibold uppercase tracking-wider text-ink/55">
-                          Address
-                        </FormLabel>
-                        <FormControl>
-                          <input {...field} className={inputBase} />
-                        </FormControl>
-                        <FormMessage className="text-[12px]" />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <div className="flex justify-end gap-2 border-t border-line px-5 py-3.5">
-                  <button
-                    onClick={() => setEditing(false)}
-                    className="cursor-pointer rounded-lg border border-line px-4 py-2 text-[13px] font-semibold text-ink/60 hover:bg-paper-dim"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={saving}
-                    className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-teal-mid/30 bg-teal-mid px-4 py-2 text-[13px] font-semibold text-white hover:bg-teal-deep disabled:opacity-50"
-                  >
-                    {saving && <Loader2 size={14} className="animate-spin" />}
-                    {saving ? "Saving…" : "Save Changes"}
-                  </button>
-                </div>
-              </form>
-            </Form>
-          </div>
-        </div>
-      )}
+          </form>
+        </Form>
+      </Modal>
     </div>
   );
 }

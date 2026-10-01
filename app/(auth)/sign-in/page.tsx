@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { authApi, setAccessToken } from "@/lib/api";
+import { authApi, clearAccessToken } from "@/lib/api";
 import { useAppDispatch } from "@/lib/redux/hooks";
 import { setSession } from "@/lib/redux/slices/authSlice";
 import { fetchWorkspace } from "@/lib/redux/slices/workspaceSlice";
@@ -62,7 +62,7 @@ const THEME = {
 
 const signInSchema = z.object({
   username: z.string().trim().min(1, "Enter your email.").email("Enter a valid email."),
-  password: z.string().min(6, "Password must be at least 6 characters."),
+  password: z.string().min(1, "Enter your password."),
 });
 
 type SignInFormValues = z.infer<typeof signInSchema>;
@@ -73,6 +73,7 @@ function SignInContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const resetSuccess = searchParams.get("reset") === "success";
+  const nextParam = searchParams.get("next");
   const dispatch = useAppDispatch();
 
   const form = useForm<SignInFormValues>({
@@ -87,10 +88,18 @@ function SignInContent() {
     try {
       const data = await authApi.login(values.username.trim(), values.password);
 
-      setAccessToken(data.accessToken);
+      // Session cookies (HttpOnly) are set by the backend. Drop any legacy
+      // localStorage token so the cookie becomes the single credential.
+      clearAccessToken();
       dispatch(setSession(data));
       void dispatch(fetchWorkspace());
-      router.push("/dashboard/purchase-dashboard");
+      // Return to the page the auth proxy originally bounced (`?next=/...`),
+      // falling back to the default dashboard. Only allow same-origin paths.
+      const next =
+        nextParam && nextParam.startsWith("/") && !nextParam.startsWith("//")
+          ? nextParam
+          : "/dashboard/purchase-dashboard";
+      router.push(next);
       router.refresh();
     } catch (err) {
       setError(

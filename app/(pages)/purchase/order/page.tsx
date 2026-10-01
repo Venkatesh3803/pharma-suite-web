@@ -2,12 +2,24 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, CheckCircle2, ClipboardList, FilePlus2, Loader2, PackageCheck, Send, X } from "lucide-react";
+import { ArrowRight, CheckCircle2, ClipboardList, FilePlus2, PackageCheck, Send, X } from "lucide-react";
 import { purchasesApi, type PurchaseRow, type PurchaseStatus } from "@/lib/api";
-import { useAppSelector } from "@/lib/redux/hooks";
+import { usePermissions } from "@/lib/hooks/usePermissions";
+import { usePaginatedList } from "@/lib/hooks/usePaginatedList";
 import { formatINR, formatDate } from "@/lib/inventory";
-
-type LoadState = "loading" | "error" | "ready";
+import {
+  PageHeader,
+  ErrorState,
+  TableShell,
+  Th,
+  Td,
+  TableRow,
+  LoadingRow,
+  EmptyRow,
+  StatusBadge,
+  PrimaryButton,
+  SecondaryButton,
+} from "@/components/common";
 
 const statusBadge: Record<PurchaseStatus, string> = {
     DRAFT: "border border-line bg-paper-dim text-ink/60",
@@ -38,41 +50,21 @@ const FILTERS: { value: PurchaseStatus | "ALL"; label: string }[] = [
 
 export default function PurchaseOrdersPage() {
     const router = useRouter();
-    const user = useAppSelector(state => state.auth.user);
-    const canManage = user?.role === "SUPER_ADMIN" || user?.role === "OWNER" || user?.role === "MANAGER";
+    const { can } = usePermissions();
+    const canManage = can.isManagerOrAbove();
 
-    const [state, setState] = useState<LoadState>("loading");
-    const [error, setError] = useState("");
-    const [list, setList] = useState<{ items: PurchaseRow[]; total: number } | null>(null);
     const [status, setStatus] = useState<PurchaseStatus | "ALL">("ALL");
-    const [refreshKey, setRefreshKey] = useState(0);
     const [busyId, setBusyId] = useState<string | null>(null);
     const [toast, setToast] = useState<string | null>(null);
 
-    useEffect(() => {
-        let ignore = false;
-        async function load() {
-            try {
-                const data = await purchasesApi.list({
-                    status: status === "ALL" ? undefined : status,
-                    pageSize: 50
-                });
-                if (!ignore) {
-                    setList(data);
-                    setState("ready");
-                }
-            } catch (e) {
-                if (!ignore) {
-                    setError(e instanceof Error ? e.message : "Could not load purchase orders.");
-                    setState("error");
-                }
-            }
-        }
-        void load();
-        return () => {
-            ignore = true;
-        };
-    }, [status, refreshKey]);
+    const { data: list, state, error, refresh, retry } = usePaginatedList({
+        fetcher: () =>
+            purchasesApi.list({
+                status: status === "ALL" ? undefined : status,
+                pageSize: 50
+            }),
+        deps: [status],
+    });
 
     useEffect(() => {
         if (!toast) return;
@@ -85,7 +77,7 @@ export default function PurchaseOrdersPage() {
         try {
             await fn(po.id);
             setToast(okMsg);
-            setRefreshKey(k => k + 1);
+            refresh();
         } catch (e) {
             setToast(e instanceof Error ? e.message : "Action failed.");
         } finally {
@@ -95,73 +87,66 @@ export default function PurchaseOrdersPage() {
 
     const renderActions = (po: PurchaseRow) => {
         if (!canManage) return null;
-        const base =
-            "flex cursor-pointer items-center gap-1 rounded-lg border px-2.5 py-1 text-[12px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40";
         return (
             <div className="flex items-center justify-end gap-1.5">
                 {po.status === "DRAFT" && (
                     <>
-                        <button
+                        <SecondaryButton
                             disabled={busyId === po.id}
                             onClick={() => void act(po, purchasesApi.submit, `${po.poNumber} submitted.`)}
-                            className={`${base} border-line bg-white text-ink/70 hover:border-stamp hover:text-stamp`}
                         >
                             <Send size={12} /> Submit
-                        </button>
-                        <button
+                        </SecondaryButton>
+                        <SecondaryButton
                             disabled={busyId === po.id}
                             onClick={() => void act(po, purchasesApi.cancel, `${po.poNumber} cancelled.`)}
-                            className={`${base} border-danger/30 bg-white text-danger hover:bg-danger-bg`}
+                            className="border-danger/30 text-danger hover:border-danger/30 hover:bg-danger-bg hover:text-danger"
                         >
                             <X size={12} /> Cancel
-                        </button>
+                        </SecondaryButton>
                     </>
                 )}
                 {po.status === "SUBMITTED" && (
-                    <button
+                    <SecondaryButton
                         disabled={busyId === po.id}
                         onClick={() => void act(po, purchasesApi.approve, `${po.poNumber} approved.`)}
-                        className={`${base} bg-ink text-paper hover:bg-teal-deep`}
+                        className="border-ink bg-ink text-paper hover:border-ink hover:bg-teal-deep hover:text-paper"
                     >
                         <CheckCircle2 size={12} /> Approve
-                    </button>
+                    </SecondaryButton>
                 )}
                 {po.status === "APPROVED" && (
-                    <button
+                    <SecondaryButton
                         disabled={busyId === po.id}
                         onClick={() => void act(po, purchasesApi.receive, `${po.poNumber} received — stock updated.`)}
-                        className={`${base} bg-ink text-paper hover:bg-teal-deep`}
+                        className="border-ink bg-ink text-paper hover:border-ink hover:bg-teal-deep hover:text-paper"
                     >
                         <PackageCheck size={12} /> Receive
-                    </button>
+                    </SecondaryButton>
                 )}
-                <button
+                <SecondaryButton
                     onClick={() => router.push(`/purchase/order/${po.id}`)}
-                    className={`${base} border-line bg-white text-ink/70 hover:border-stamp hover:text-stamp`}
                 >
                     Open <ArrowRight size={12} />
-                </button>
+                </SecondaryButton>
             </div>
         );
     };
 
     return (
         <div className="flex w-full flex-col gap-6">
-            <div className="flex items-start justify-between gap-4">
-                <div>
-                    <span className="text-[10.5px] font-medium uppercase tracking-[0.18em] text-stamp font-mono">Procurement</span>
-                    <h1 className="mt-1.5 font-display text-2xl font-semibold tracking-tight text-ink">Purchase Orders</h1>
-                    <p className="mt-1 text-[13.5px] text-ink/55">Draft → submit → approve → receive. Stock lands in the ledger only on receipt (GRN).</p>
-                </div>
-                {canManage && (
-                    <button
-                        onClick={() => router.push("/purchase/order/new")}
-                        className="flex cursor-pointer items-center gap-2 rounded-lg bg-ink px-4 py-2.5 text-[13px] font-semibold text-paper transition-colors hover:bg-teal-deep"
-                    >
-                        <FilePlus2 size={15} /> New Purchase Order
-                    </button>
-                )}
-            </div>
+            <PageHeader
+                eyebrow="Procurement"
+                title="Purchase Orders"
+                description="Draft → submit → approve → receive. Stock lands in the ledger only on receipt (GRN)."
+                actions={
+                    canManage ? (
+                        <PrimaryButton onClick={() => router.push("/purchase/order/new")}>
+                            <FilePlus2 size={15} /> New Purchase Order
+                        </PrimaryButton>
+                    ) : undefined
+                }
+            />
 
             <div className="flex flex-wrap items-center gap-2">
                 {FILTERS.map(f => (
@@ -178,95 +163,69 @@ export default function PurchaseOrdersPage() {
             </div>
 
             {state === "error" && (
-                <div className="flex flex-col items-center gap-4 rounded-2xl border border-line bg-white px-12 py-14 text-center shadow-[0_1px_2px_rgba(20,32,28,0.04)]">
-                    <ClipboardList size={32} className="text-danger/60" />
-                    <div>
-                        <div className="text-[14px] font-medium text-ink">Could not load purchase orders.</div>
-                        <div className="mt-1 text-[12.5px] text-ink/50">{error}</div>
-                    </div>
-                    <button
-                        onClick={() => {
-                            setState("loading");
-                            setRefreshKey(k => k + 1);
-                        }}
-                        className="cursor-pointer rounded-lg bg-ink px-4 py-2 text-[13px] font-semibold text-paper hover:bg-teal-deep"
-                    >
-                        Retry
-                    </button>
-                </div>
+                <ErrorState
+                    title="Could not load purchase orders."
+                    description={error}
+                    onRetry={retry}
+                    icon={<ClipboardList size={32} className="text-danger/60" />}
+                />
             )}
 
-            <div className="overflow-hidden rounded-2xl border border-line bg-white shadow-[0_1px_2px_rgba(20,32,28,0.04)]">
-                <div className="overflow-x-auto">
-                    <table className="w-full border-collapse text-left text-[13.5px]">
-                        <thead>
-                            <tr className="border-b border-line">
-                                <th className="px-4 py-3.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.12em] text-ink/40">PO Number</th>
-                                <th className="px-4 py-3.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.12em] text-ink/40">Supplier</th>
-                                <th className="px-4 py-3.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.12em] text-ink/40">Branch</th>
-                                <th className="px-4 py-3.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.12em] text-ink/40">Created</th>
-                                <th className="px-4 py-3.5 font-mono text-[10.5px] font-semibold uppercase tracking-[0.12em] text-ink/40">Expected</th>
-                                <th className="px-4 py-3.5 text-right font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/55">
-                                    Total
-                                </th>
-                                <th className="px-4 py-3.5 text-center font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/55">
-                                    Status
-                                </th>
-                                <th className="px-4 py-3.5 text-right font-mono text-[10.5px] font-semibold uppercase tracking-[0.08em] text-ink/55">
-                                    Actions
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {state === "loading" && !list && (
-                                <tr>
-                                    <td colSpan={8} className="px-12 py-14">
-                                        <div className="flex items-center justify-center gap-2 text-[13px] text-ink/45">
-                                            <Loader2 size={16} className="animate-spin" /> Loading purchase orders…
-                                        </div>
-                                    </td>
-                                </tr>
-                            )}
+            <TableShell>
+                <thead>
+                    <tr className="border-b border-line">
+                        <Th>PO Number</Th>
+                        <Th>Supplier</Th>
+                        <Th>Branch</Th>
+                        <Th>Created</Th>
+                        <Th>Expected</Th>
+                        <Th align="right">Total</Th>
+                        <Th align="center">Status</Th>
+                        <Th align="right">Actions</Th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {state === "loading" && !list && (
+                        <LoadingRow colSpan={8} message="Loading purchase orders…" />
+                    )}
 
-                            {state === "ready" &&
-                                list?.items.map(po => (
-                                    <tr
-                                        key={po.id}
-                                        onClick={() => router.push(`/purchase/order/${po.id}`)}
-                                        className="cursor-pointer border-b border-line/60 transition-colors hover:bg-paper/70"
-                                    >
-                                        <td className="px-4 py-3.5 font-mono text-[13px] font-semibold text-ink">{po.poNumber}</td>
-                                        <td className="px-4 py-3.5">
-                                            <div className="font-medium text-ink/80">{po.supplier?.name ?? "—"}</div>
-                                            {po.supplier?.leadTimeDays != null && (
-                                                <div className="text-[11px] text-ink/40">lead {po.supplier.leadTimeDays}d</div>
-                                            )}
-                                        </td>
-                                        <td className="px-4 py-3.5 text-ink/60">{po.branch?.name ?? "—"}</td>
-                                        <td className="px-4 py-3.5 text-ink/60">{formatDate(po.createdAt)}</td>
-                                        <td className="px-4 py-3.5 text-ink/60">{po.expectedDelivery ? formatDate(po.expectedDelivery) : "—"}</td>
-                                        <td className="px-4 py-3.5 text-right font-mono font-bold text-ink">{formatINR(Number(po.total))}</td>
-                                        <td className="px-4 py-3.5 text-center">
-                                            <span className={`inline-block px-2.5 py-1 text-[11.5px] font-semibold ${statusBadge[po.status]}`}>
-                                                {statusLabel[po.status]}
-                                            </span>
-                                        </td>
-                                        <td onClick={e => e.stopPropagation()}>{renderActions(po)}</td>
-                                    </tr>
-                                ))}
+                    {state === "ready" &&
+                        list?.items.map(po => (
+                            <TableRow
+                                key={po.id}
+                                onClick={() => router.push(`/purchase/order/${po.id}`)}
+                            >
+                                <Td className="font-mono text-[13px] font-semibold text-ink">{po.poNumber}</Td>
+                                <Td>
+                                    <div className="font-medium text-ink/80">{po.supplier?.name ?? "—"}</div>
+                                    {po.supplier?.leadTimeDays != null && (
+                                        <div className="text-[11px] text-ink/40">lead {po.supplier.leadTimeDays}d</div>
+                                    )}
+                                </Td>
+                                <Td className="text-ink/60">{po.branch?.name ?? "—"}</Td>
+                                <Td className="text-ink/60">{formatDate(po.createdAt)}</Td>
+                                <Td className="text-ink/60">{po.expectedDelivery ? formatDate(po.expectedDelivery) : "—"}</Td>
+                                <Td align="right" className="font-mono font-bold text-ink">{formatINR(Number(po.total))}</Td>
+                                <Td align="center">
+                                    <StatusBadge className={statusBadge[po.status]}>
+                                        {statusLabel[po.status]}
+                                    </StatusBadge>
+                                </Td>
+                                <Td align="right">
+                                    <div onClick={e => e.stopPropagation()}>{renderActions(po)}</div>
+                                </Td>
+                            </TableRow>
+                        ))}
 
-                            {state === "ready" && list && list.items.length === 0 && (
-                                <tr>
-                                    <td colSpan={8} className="px-12 py-12 text-center text-ink/40">
-                                        <ClipboardList size={32} className="mx-auto mb-3 opacity-40" />
-                                        <div className="text-[14px]">No purchase orders found.</div>
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                    {state === "ready" && list && list.items.length === 0 && (
+                        <EmptyRow
+                            colSpan={8}
+                            icon={<ClipboardList size={32} />}
+                            message="No purchase orders found."
+                        />
+                    )}
+                </tbody>
+            </TableShell>
 
             {toast && (
                 <div className="fixed bottom-6 right-6 z-50 flex max-w-sm items-center gap-2.5 rounded-2xl border border-line bg-white px-4 py-3 shadow-lg">

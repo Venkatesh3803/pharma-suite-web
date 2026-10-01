@@ -13,11 +13,12 @@ export function proxy(request: NextRequest) {
   const hasSessionCookie = request.cookies.get("pharmasuite_refresh") !== undefined;
   const hasOnboardedCookie = request.cookies.get("pharmasuite_onboarded") !== undefined;
 
-  // A signed-in user has no business on the auth pages.
-  if (hasSessionCookie && AUTH_ROUTES.some(route => pathname === route)) {
-    const dashUrl = new URL("/dashboard/purchase-dashboard", request.url);
-    return NextResponse.redirect(dashUrl);
-  }
+  // NOTE: cookie presence is NOT proof of authentication (it is unsigned
+  // client state). Absence means definitely logged out -> fail closed.
+  // Presence means "maybe authenticated" -> let through and defer the real
+  // check to the backend (/api/auth/me) via AuthBootstrap + API guards.
+  // Do NOT redirect away from auth pages based on cookie presence alone:
+  // a forged cookie would otherwise cause redirect loops / false sessions.
 
   // Onboarding is only for a freshly provisioned workspace; once completed
   // (or if a workspace already onboarded) the user goes straight to the app.

@@ -133,6 +133,7 @@ const navigationItems: NavItem[] = [
     hasDropdown: true,
     prefix: "/finance",
     subItems: [
+      { title: "Overview", url: "/finance/overview", feature: "finance" },
       { title: "Journal Entries", url: "/finance/journal", feature: "finance" },
       { title: "Ledger", url: "/finance/ledger", feature: "finance" },
       { title: "Accounts & Trial", url: "/finance/accounts", feature: "finance" },
