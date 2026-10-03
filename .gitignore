@@ -19,6 +19,10 @@ package-lock.json
 /.next/
 /out/
 
+# opennext / cloudflare workers
+/.open-next/
+/.wrangler/
+
 # production
 /build
 
