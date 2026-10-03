@@ -37,6 +37,7 @@ const PAYMENT_MODES: { mode: PaymentMode; label: string }[] = [
     { mode: "CASH", label: "Cash" },
     { mode: "UPI", label: "UPI" },
     { mode: "CARD", label: "Card" },
+    { mode: "BANK_TRANSFER", label: "Bank Transfer" },
     { mode: "CREDIT", label: "Credit" }
 ];
 
