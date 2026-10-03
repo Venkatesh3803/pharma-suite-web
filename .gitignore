@@ -9,6 +9,8 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+# use yarn only - prevent stale npm lockfile from being committed
+package-lock.json
 
 # testing
 /coverage

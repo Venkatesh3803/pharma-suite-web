@@ -2,11 +2,16 @@
   "name": "pharma-suite",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "yarn@4.9.1",
+  "engines": {
+    "node": "20.x"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "build:cf": "next build"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
