@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 
-const API_TARGET = process.env.API_BACKEND_URL || "http://localhost:5000";
-
+// NOTE: /api/* proxying is handled at runtime by middleware.ts (works on
+// Cloudflare Workers where build-time env is unavailable). Do NOT add
+// rewrites() here — it bakes API_BACKEND_URL at build time and conflicts
+// with the middleware proxy.
 const nextConfig: NextConfig = {
   // Skip ESLint in production builds (run `yarn lint` in CI separately).
   // This saves 1-3 min on Cloudflare Pages.
@@ -23,14 +25,6 @@ const nextConfig: NextConfig = {
       "tailwind-merge",
       "class-variance-authority",
     ],
-  },
-  async rewrites() {
-    return [
-      {
-        source: "/api/:path*",
-        destination: `${API_TARGET}/api/:path*`,
-      },
-    ];
   },
 };
 
