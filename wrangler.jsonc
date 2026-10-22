@@ -6,7 +6,11 @@
   "compatibility_flags": ["nodejs_compat"],
   "assets": {
     "directory": ".open-next/assets",
-    "binding": "ASSETS"
+    "binding": "ASSETS",
+    // Serve public files at their literal paths. Without this, Cloudflare's
+    // default HTML handling 307-redirects /offline.html -> /offline, which
+    // breaks the service worker's precache/fallback URL.
+    "html_handling": "none"
   },
   "observability": {
     "enabled": true
