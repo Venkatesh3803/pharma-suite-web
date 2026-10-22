@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0e3b36" />
+    <title>Offline · PharmaSuite</title>
+    <style>
+      :root {
+        --ink: #14201c;
+        --paper: #f7f4ec;
+        --line: #ded7c4;
+        --teal: #0e3b36;
+        --stamp: #c1652b;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: "IBM Plex Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+        text-align: center;
+      }
+      .card {
+        width: 100%;
+        max-width: 400px;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 64px;
+        height: 64px;
+        margin-bottom: 20px;
+        border-radius: 20px;
+        background: var(--teal);
+        color: var(--paper);
+      }
+      .eyebrow {
+        margin: 0 0 8px;
+        font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+        font-size: 10.5px;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--stamp);
+      }
+      h1 {
+        margin: 0;
+        font-size: 24px;
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+      }
+      p {
+        margin: 12px 0 0;
+        font-size: 14px;
+        line-height: 1.55;
+        color: rgba(20, 32, 28, 0.6);
+      }
+      .note {
+        margin-top: 20px;
+        padding: 12px 14px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #fff;
+        font-size: 12.5px;
+        color: rgba(20, 32, 28, 0.65);
+      }
+      button {
+        margin-top: 22px;
+        width: 100%;
+        padding: 11px 16px;
+        border: 0;
+        border-radius: 10px;
+        background: var(--teal);
+        color: var(--paper);
+        font: inherit;
+        font-size: 13.5px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #1b5a50;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <div class="badge" aria-hidden="true">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 2l20 20" />
+          <path d="M8.5 16.5a5 5 0 0 1 7 0" />
+          <path d="M5 12.5a10 10 0 0 1 3.5-2.5" />
+          <path d="M15.5 10a10 10 0 0 1 3.5 2.5" />
+          <path d="M2 8.82a15 15 0 0 1 4.17-2.65" />
+          <path d="M10.66 5c4.01-.36 8.14.9 11.34 3.76" />
+          <path d="M16.85 11.25a10 10 0 0 1 2.22 1.68" />
+          <path d="M5 19.5a14.9 14.9 0 0 1-2.26-2.44" />
+          <path d="M8.5 19.5a10 10 0 0 1 7 0" />
+          <circle cx="12" cy="16" r="0.5" fill="currentColor" />
+        </svg>
+      </div>
+      <p class="eyebrow">Connection lost</p>
+      <h1>You're offline</h1>
+      <p>
+        PharmaSuite needs a connection to load this page. Your queued sales are safe on this
+        device and will sync automatically the moment you're back online.
+      </p>
+      <div class="note">
+        Check your internet connection, then try again. Already installed? Reopening the app
+        will also retry.
+      </div>
+      <button type="button" onclick="location.reload()">Try again</button>
+    </main>
+  </body>
+</html>
